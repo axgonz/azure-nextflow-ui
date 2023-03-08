@@ -1,0 +1,19 @@
+{
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#0A465B",
+        "titleBar.activeForeground": "#F7FCFE"
+    },
+    "cSpell.words": [
+        "Actix",
+        "Leptos"
+    ],
+    "emmet.includeLanguages": {
+        "rust": "html",
+        "*.rs": "html"
+      },
+    "tailwindCSS.includeLanguages": {
+        "rust": "html",
+        "*.rs": "html"
+    },
+    "css.validate": false
+}

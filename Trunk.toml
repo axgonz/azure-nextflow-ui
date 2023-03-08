@@ -1,0 +1,3 @@
+[build]
+target = "spa/index.html"
+dist = "dist"
