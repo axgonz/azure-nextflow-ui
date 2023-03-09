@@ -5,7 +5,8 @@
     },
     "cSpell.words": [
         "Actix",
-        "Leptos"
+        "Leptos",
+        "reqwest"
     ],
     "emmet.includeLanguages": {
         "rust": "html",

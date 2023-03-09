@@ -3,8 +3,7 @@ use crate::models::{
 };
 
 use crate::components::{
-    progress_bar::ProgressBar,
-    progress_bar::ProgressBarProps
+    progress_bar::*,
 };
 
 use leptos::*;

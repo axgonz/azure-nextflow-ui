@@ -3,8 +3,7 @@ mod models;
 mod pages;
 
 use crate::components::{
-    nav_bar::NavBar,
-    nav_bar::NavBarProps,
+    nav_bar::*,
 };
 
 use crate::models::{
@@ -12,10 +11,8 @@ use crate::models::{
 };
 
 use crate::pages::{
-    home_page::HomePage,
-    home_page::HomePageProps,
-    about_page::AboutPage,
-    about_page::AboutPageProps
+    home_page::*,
+    about_page::*,
 };
 
 use leptos::*;
