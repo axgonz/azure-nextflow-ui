@@ -6,9 +6,6 @@ use leptos::*;
 use reqwest::{
     Response,
     Error,
-    header::ACCESS_CONTROL_ALLOW_ORIGIN,
-    header::ORIGIN,
-    header::CONTENT_TYPE
 };
 
 use serde::{
@@ -78,8 +75,6 @@ async fn web_get(uri: &String) -> Response {
 async fn web_post(uri: &String, json: &Value) -> Result<Response, Error> {
     let client = reqwest::Client::new();
     match client.post(uri)
-        .header(ORIGIN, "http://127.0.0.1:8080")
-        .header(ACCESS_CONTROL_ALLOW_ORIGIN, "http://127.0.0.1:8080")
         .json(json)
         .send()
         .await {
