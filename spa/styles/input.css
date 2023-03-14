@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+ul li button {
+    display: none;
+}
+
+ul li:hover button {
+    display: flex;
+}
+
+ul li:hover ul li button {
+    display: none;
+}
+
+ul li:hover ul li:hover button {
+    display: flex;
+}
