@@ -13,6 +13,7 @@ use crate::models::{
 use crate::pages::{
     home_page::*,
     about_page::*,
+    status_page::*,
 };
 
 use leptos::*;
@@ -39,6 +40,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                 <Routes>
                     <Route path="/" view=|cx| view! { cx, <HomePage/> }/>
                     <Route path="/about" view=|cx| view! { cx, <AboutPage/> }/>
+                    <Route path="/status" view=|cx| view! { cx, <StatusPage/> }/>
                 </Routes>
             </main>
         </Router>
