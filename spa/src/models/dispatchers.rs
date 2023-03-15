@@ -31,10 +31,6 @@ pub struct NextflowDispatchers {
 }
 
 impl NextflowDispatchers {
-    pub fn new() -> Self {
-        Self::mock_load()
-    }
-
     pub fn load(storage_key: &String) -> Self {
         let items: Vec<NextflowDispatcher> = if let Ok(Some(storage)) = window().unwrap().local_storage() {
             storage
@@ -50,18 +46,6 @@ impl NextflowDispatchers {
         };
 
         Self { items }
-    }
-
-    pub fn mock_load() -> Self {
-        Self {
-            items: vec![
-                NextflowDispatcher::new(
-                    Uuid::new_v4(),
-                    "http://localhost:7071".to_string(),
-                    "https://raw.githubusercontent.com/axgonz/azure-nextflow/main/nextflow/pipelines/nextflow.config".to_string()
-                )
-            ]
-        }
     }
 
     pub fn is_empty(&self) -> bool {

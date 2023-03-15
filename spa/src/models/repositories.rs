@@ -56,10 +56,6 @@ pub struct NextflowRepos {
 }
 
 impl NextflowRepos {
-    pub fn new() -> Self {
-        Self::mock_load()
-    }
-
     pub fn load(storage_key: &String) -> Self {
         let items: Vec<NextflowRepo> = if let Ok(Some(storage)) = window().unwrap().local_storage() {
             storage
@@ -77,18 +73,7 @@ impl NextflowRepos {
         Self { items }
     }
 
-    pub fn mock_load() -> Self {
-        Self {
-            items: vec![
-                NextflowRepo::new(
-                    Uuid::new_v4(),
-                    "axgonz".to_string(),
-                    "azure-nextflow".to_string(),
-                )
-            ]
-        }
-    }
-
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
     }

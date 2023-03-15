@@ -1,7 +1,6 @@
 use crate::models::{
     repositories::*,
     dispatchers::*,
-    params::*,
 };
 
 use common::*;
