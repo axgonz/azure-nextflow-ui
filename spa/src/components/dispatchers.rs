@@ -87,13 +87,23 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
                     </div>
                     </div>
                 </Show>
-                <IconButton 
-                    kind=ButtonKind::Button 
-                    colour=Some(IconColour::Blue)
-                    icon="add-outline".to_string() 
-                    label="Add dispatcher".to_string() 
-                    on_click=on_click_add
-                />
+                <Show 
+                    when={move || dispatchers.get().is_empty()}
+                    fallback={move |cx| view! {cx, 
+                        <Icon
+                            colour=Some(IconColour::Disabled)
+                            icon="add-outline".to_string() 
+                        />
+                    }}
+                >
+                    <IconButton 
+                        kind=ButtonKind::Button 
+                        colour=Some(IconColour::Blue)
+                        icon="add-outline".to_string() 
+                        label="Add dispatcher".to_string() 
+                        on_click=on_click_add
+                    />
+                </Show>
             </div>
             <ul>
                 <For

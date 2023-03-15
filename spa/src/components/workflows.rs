@@ -8,7 +8,7 @@ use leptos::*;
 
 #[component] 
 fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
-    // let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
+    let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
 
     let req = DispatchReq {
         config_uri: "https://.../nextflow.config".to_string(),
@@ -58,7 +58,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 <a href={&workflow.parameters.url} class="mr-2">{&workflow.parameters.name}</a>
                 <div class="grow" />
                 <Show 
-                    when={move || pending.get() }
+                    when={move || (pending.get() || dispatchers.get().is_empty()) }
                     fallback={
                         move |cx| {
                             let on_click = on_click.to_owned();
@@ -74,7 +74,17 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                         } 
                     }
                 >
-                    <p>"waiting..."</p>
+                    <Show
+                        when={move || !dispatchers.get().is_empty()}
+                        fallback={move |cx| view! {cx, 
+                            <Icon
+                                colour=Some(IconColour::Disabled)
+                                icon="play-outline".to_string() 
+                            />
+                        }}
+                    >
+                        <p>"waiting..."</p>
+                    </Show>
                 </Show>
             </div> 
             <Show 

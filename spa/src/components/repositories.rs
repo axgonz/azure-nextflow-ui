@@ -61,7 +61,7 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
                 <h3 class="grow text-xl">"Workflows"</h3>
                 <Show 
                     when={move || show.get()}
-                    fallback=|_cx| view! { cx, }
+                    fallback=|_cx| view! {cx, }
                 >
                     <div class="absolute inset-0 bg-black bg-opacity-30 h-screen w-full flex justify-center items-start md:items-center pt-10 md:pt-0">
                     <div class="bg-gray-100 rounded px-4 py-4">

@@ -17,6 +17,7 @@ pub enum IconColour {
     Blue,
     Green,
     Gray,
+    Disabled,
 }
 
 /// A pre-styled icon button component (ToDo, add type and label)
@@ -43,7 +44,8 @@ where F: FnMut(MouseEvent) + 'static {
         IconColour::Blue  => {class = format!("{} bg-blue-500 hover:bg-blue-700", class)},
         IconColour::Red   => {class = format!("{} bg-red-500 hover:bg-red-700", class)},
         IconColour::Green => {class = format!("{} bg-green-500 hover:bg-green-700", class)},
-        IconColour::Gray  => {class = format!("{} bg-gray-300 hover:bg-gray-500", class)},
+        IconColour::Gray  => {class = format!("{} bg-gray-500 hover:bg-gray-700", class)},
+        IconColour::Disabled  => {class = format!("{} bg-gray-300 hover:bg-gray-500", class)},
     }
         
     view! {cx,
@@ -75,10 +77,11 @@ pub fn Icon(cx: Scope,
 
     let mut class: String = "flex text-white font-bold py-1 px-1 rounded".to_string();
     match colour {
-        IconColour::Blue  => {class = format!("{} bg-blue-500 hover:bg-blue-700", class)},
-        IconColour::Red   => {class = format!("{} bg-red-500 hover:bg-red-700", class)},
-        IconColour::Green => {class = format!("{} bg-green-500 hover:bg-green-700", class)},
-        IconColour::Gray  => {class = format!("{} bg-gray-300 hover:bg-gray-500", class)},
+        IconColour::Blue        => {class = format!("{} bg-blue-500", class)},
+        IconColour::Red         => {class = format!("{} bg-red-500", class)},
+        IconColour::Green       => {class = format!("{} bg-green-500", class)},
+        IconColour::Gray        => {class = format!("{} bg-gray-500", class)},
+        IconColour::Disabled    => {class = format!("{} bg-gray-300", class)},
     }
         
     view! {cx,
