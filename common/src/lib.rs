@@ -65,7 +65,7 @@ impl Loaders {
     }
 
     pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher) -> Vec<Message> {
-        return Self::web_load_queue_message(dispatcher.url).await
+        return Self::web_load_queue_message(dispatcher.api_url).await
     }
 
     pub async fn web_load_github_nextflow_workflow(project: NextflowProject) -> Vec<NextflowWorkflow> {
@@ -158,4 +158,13 @@ impl Actions {
 
         return result
     }    
+
+    pub async fn web_action_dispatch_workflow_new(api_url: String, what_if: bool, req: DispatchReq) -> DispatchRes {
+        let req_uri: String = format!("{}/api/nxfutil/dispatch?whatif={}", api_url, what_if.to_string());
+        let req_json: Value = serde_json::to_value(req).unwrap();
+        let res = WebHelpers::web_post(&req_uri, &req_json).await.unwrap();
+        let result: DispatchRes = res.json().await.unwrap();
+
+        return result
+    } 
 }

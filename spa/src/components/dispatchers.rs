@@ -15,7 +15,8 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
     let set_dispatchers = use_context::<WriteSignal<NextflowDispatchers>>(cx).unwrap();
 
     let (show, set_show) = create_signal(cx, false);
-    let (new_dispatcher_url, set_new_dispatcher_url) = create_signal(cx, "".to_string());
+    let (f_dispatcher_url, set_f_dispatcher_url) = create_signal(cx, "".to_string());
+    let (f_dispatcher_config, set_f_dispatcher_config) = create_signal(cx, "".to_string());
     
     let on_click_add = move |_| {
         log!("{:#?}", show.get());
@@ -23,30 +24,38 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
     };
 
     let on_click_save = move |_| {
-        log!("save: {}", new_dispatcher_url.get());
+        log!("save: {}", f_dispatcher_url.get());
+        log!("save: {}", f_dispatcher_config.get());
 
         set_dispatchers.update(
             |dispatchers| dispatchers.add(
                 NextflowDispatcher::new(
-                    Uuid::new_v4(), 
-                    new_dispatcher_url.get()
+                    Uuid::new_v4(),
+                    f_dispatcher_url.get(),
+                    f_dispatcher_config.get()
                 )
             )
         );
 
-        set_new_dispatcher_url.set("".to_string());
+        set_f_dispatcher_url.set("".to_string());
+        set_f_dispatcher_config.set("".to_string());
         set_show.update(|b| *b = !*b) 
     };
     
     let on_click_cancel = move |_| {
         log!("cancel");
-        set_new_dispatcher_url.set("".to_string());
+        set_f_dispatcher_url.set("".to_string());
+        set_f_dispatcher_config.set("".to_string());
         set_show.update(|b| *b = !*b) 
     };
 
     let on_input_url = move |ev| {
-        set_new_dispatcher_url.set(event_target_value(&ev));
+        set_f_dispatcher_url.set(event_target_value(&ev));
     };
+
+    let on_input_config = move |ev| {
+        set_f_dispatcher_config.set(event_target_value(&ev));
+    };    
 
     view!{cx,
         <div class="my-1 mx-2">
@@ -70,8 +79,11 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
                         />
                     </div>
                     <div class="flex flex-col">
-                        <label class="rounded">"Url"</label>
-                        <input type="text" on:input=on_input_url prop:value={ move || new_dispatcher_url.get()}/>
+                        <label class="rounded">"Api url"</label>
+                        <input id="api" type="text" on:input=on_input_url prop:value={ move || f_dispatcher_url.get()}/>
+                        
+                        <label class="rounded">"Config url"</label>
+                        <input id="cfg" type="text" on:input=on_input_config prop:value={ move || f_dispatcher_config.get()}/>
 
                         <div class="flex">
                             <div class="grow"/>

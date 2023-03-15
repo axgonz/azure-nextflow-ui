@@ -1,4 +1,6 @@
 use common::*;
+use web_sys::MouseEvent;
+use web_sys::Event;
 
 use crate::components::{
     icons::*,
@@ -6,51 +8,163 @@ use crate::components::{
 
 use leptos::*;
 
+#[component]
+fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
+    let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
+
+    // Get our form pre-reqs from parent (cx)
+    let show_form = use_context::<ReadSignal<bool>>(cx).unwrap();
+    let set_show_form = use_context::<WriteSignal<bool>>(cx).unwrap();
+    let action = use_context::<Action<(String, bool, DispatchReq), DispatchRes>>(cx).unwrap();
+
+    // Form signals
+    let (request, set_request) = create_signal(cx, 
+        DispatchReq {
+            config_uri: dispatchers.get().config_url(),
+            pipeline_uri: workflow.pipeline.url,
+            parameters_uri: workflow.parameters.url,
+            parameters_json: vec![],
+            auto_delete: true
+        }
+    );
+
+    log!("{:#?}", request.get());
+
+    let (f_what_if, set_f_what_if) = create_signal(cx, true);
+
+    // Form inputs
+    let toggle_show = move |_: MouseEvent| {
+        set_show_form.update(|b| *b = !*b);
+    };   
+    let _update_cfg_uri = move |ev: Event| {
+        set_request.update(|req| req.config_uri = event_target_value(&ev))
+    };
+    let _update_pln_uri = move |ev: Event| {
+        set_request.update(|req| req.pipeline_uri = event_target_value(&ev))
+    };
+    let _update_arg_uri = move |ev: Event| {
+        set_request.update(|req| req.parameters_uri = event_target_value(&ev))
+    };
+    let toggle_auto_delete = move |ev: Event| {
+        set_request.update(|req| req.auto_delete = event_target_checked(&ev))
+    };
+    let toggle_what_if = move |ev: Event| {
+        set_f_what_if.set(event_target_checked(&ev));
+    };
+
+    // Form action
+    let on_click_confirm = move |mouse_event: MouseEvent| {
+        toggle_show(mouse_event);
+        action.dispatch(
+            (
+                dispatchers.get().api_url(),
+                f_what_if.get(),
+                request.get(),
+            )
+        )
+    };
+    
+    view!{cx,
+        <Show 
+            when={move || show_form.get()}
+            fallback=|_cx| view! { cx, }
+        >
+            <div class="absolute inset-0 bg-black bg-opacity-30 h-screen w-full flex justify-center items-start md:items-center pt-10 md:pt-0">
+            <div class="bg-gray-100 rounded px-4 py-4">
+            <div class="flex">
+                <h2 class="w-64">"Dispatch workflow"</h2>
+                <div class="grow" />
+                <IconButton 
+                    kind=ButtonKind::Button 
+                    colour=Some(IconColour::Gray)
+                    icon="close-outline".to_string() 
+                    label="Cancel".to_string() 
+                    on_click=toggle_show
+                />
+            </div>
+            <div class="flex flex-col">               
+                <label class="rounded">"Repository"</label>
+                <input type="text" value={format!("{}/{}", &workflow.project.org, &workflow.project.repo)} readonly/>
+
+                <label class="rounded">"Project"</label>
+                <input type="text" value={&workflow.project.name} readonly/>
+
+                <label class="rounded">"Dispatcher"</label>
+                <input type="text" value={dispatchers.get().api_url()} readonly/>                
+
+                <label class="rounded">"Config"</label>
+                <input type="text" value={request.get().config_uri} readonly/>
+
+                <label class="rounded">"Pipeline"</label>
+                <input type="text" value={request.get().pipeline_uri} readonly/>
+
+                <label class="rounded">"Parameters"</label>
+                <input type="text" value={request.get().parameters_uri} readonly/>
+
+                <div class="flex">
+                    <label class="rounded">"Auto delete"</label>
+                    <div class="grow" />
+                    <input id="toggle_auto_delete" type="checkbox"
+                        prop:checked={move || request.get().auto_delete}
+                        on:input=toggle_auto_delete
+                    />
+                </div>
+
+                <div class="flex">
+                    <label class="rounded">"What if"</label>
+                    <div class="grow" />
+                    <input id="toggle_what_if" type="checkbox"
+                        prop:checked={move || f_what_if.get()}
+                        on:input=toggle_what_if
+                    />
+                </div>                
+               
+                <div class="flex">
+                    <div class="grow"/>
+                    // <button type="submit">"submit"</button>
+                    <IconButton 
+                        kind=ButtonKind::Submit 
+                        colour=Some(IconColour::Blue)
+                        icon="checkmark-outline".to_string() 
+                        label="Confirm".to_string() 
+                        on_click=on_click_confirm
+                    />
+                </div>
+            </div>
+            </div>
+            </div>
+        </Show>
+    }
+}
+
 #[component] 
 fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
 
-    let req = DispatchReq {
-        config_uri: "https://.../nextflow.config".to_string(),
-        pipeline_uri: "https://.../pipeline.nf".to_string(),
-        parameters_uri: "https://.../parameters.json".to_string(),
-        parameters_json: vec![
-            DispatchReqParam {
-                name: "myString".to_string(),
-                value: "foobar".into()
-            },
-            DispatchReqParam {
-                name: "myBool".to_string(),
-                value: true.into()
-            },
-            DispatchReqParam {
-                name: "myInt".to_string(),
-                value: 123.into()
-            },
-            DispatchReqParam {
-                name: "myFloat".to_string(),
-                value: 0.12.into()
-            }
-        ],
-        auto_delete: true
-    };
-
-    let dispatch_workflow = create_action(cx, 
-        |input: &DispatchReq| {
-            let req = input.to_owned();
-            async { Actions::web_action_dispatch_workflow(req).await }
+    // Setup our form pre-reqs
+    let (show_form, set_show_form) = create_signal(cx, false);
+    let action = create_action(cx, 
+        |input: &(String, bool, DispatchReq)| {
+            let input = input.clone();
+            async move { Actions::web_action_dispatch_workflow_new(input.0, input.1, input.2).await }
         } 
     );
+    provide_context(cx, show_form);
+    provide_context(cx, set_show_form);
+    provide_context(cx, action);
+    let workflow_for_form = workflow.clone();
+    // End form pre-reqs
 
-    let on_click = move |_| {
-        dispatch_workflow.dispatch(req.to_owned());
+    let toggle_show_form = move |_| {
+        set_show_form.update(|b| *b = !*b);
     };
 
-    let submitted = dispatch_workflow.input();
-    let pending = dispatch_workflow.pending();
-    let dispatch_res = dispatch_workflow.value(); 
+    let submitted = action.input();
+    let pending = action.pending();
+    let dispatch_res = action.value(); 
 
     view! { cx,
+        <DispatchForm workflow=workflow_for_form />        
         <li class="my-2 py-1 px-2 bg-gray-200 rounded">
             <div class="flex">
                 <a href={&workflow.project.html_url} class="mr-2">{&workflow.project.name}</a>
@@ -61,14 +175,14 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                     when={move || (pending.get() || dispatchers.get().is_empty()) }
                     fallback={
                         move |cx| {
-                            let on_click = on_click.to_owned();
+                            // let on_click = on_click.to_owned();
                             view! { cx, 
                                 <IconButton 
                                     kind=ButtonKind::Button
                                     colour=Some(IconColour::Green)
                                     icon="play-outline".to_string() 
                                     label="Dispatch workflow".to_string() 
-                                    on_click=on_click
+                                    on_click=toggle_show_form
                                 />
                             }
                         } 

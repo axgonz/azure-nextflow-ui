@@ -195,14 +195,16 @@ impl NextflowRepos {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NextflowDispatcher {
     pub id: Uuid,
-    pub url: String,
+    pub api_url: String,
+    pub config_url: String,
 }
 
 impl NextflowDispatcher {
-    pub fn new(id: Uuid, url: String) -> Self {
+    pub fn new(id: Uuid, api_url: String, config_url: String) -> Self {
         Self {
             id,
-            url,
+            api_url,
+            config_url,
         }
     }
 }
@@ -241,6 +243,7 @@ impl NextflowDispatchers {
                 NextflowDispatcher::new(
                     Uuid::new_v4(),
                     "http://localhost:7071".to_string(),
+                    "https://raw.githubusercontent.com/axgonz/azure-nextflow/main/nextflow/pipelines/nextflow.config".to_string()
                 )
             ]
         }
@@ -250,9 +253,18 @@ impl NextflowDispatchers {
         self.items.is_empty()
     }
 
-    pub fn url(&mut self) -> String {
+    pub fn api_url(&mut self) -> String {
         if !self.items.is_empty() {
-            self.items[0].url.clone()
+            self.items[0].api_url.clone()
+        }
+        else {
+            "".to_string()
+        }
+    }    
+
+    pub fn config_url(&mut self) -> String {
+        if !self.items.is_empty() {
+            self.items[0].config_url.clone()
         }
         else {
             "".to_string()

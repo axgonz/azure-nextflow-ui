@@ -79,11 +79,11 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
                         />
                     </div>
                     <div class="flex flex-col">
-                        <label for="org" class="rounded">"Organization"</label>
+                        <label class="rounded">"Organization"</label>
                         <input id="org" type="text" on:input=on_input_org prop:value={move || new_repo_org.get()}/>
                         
                         <label class="rounded">"Repository"</label>
-                        <input type="text" on:input=on_input_name prop:value={ move || new_repo_name.get()}/>
+                        <input id="rep" type="text" on:input=on_input_name prop:value={ move || new_repo_name.get()}/>
 
                         <div class="flex">
                             <div class="grow"/>

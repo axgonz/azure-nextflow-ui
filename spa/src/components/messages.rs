@@ -103,7 +103,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     view! { cx,
         <li>
             <div class="pt-2 flex">
-                <h3 class="font-bold">{dispatcher.url}</h3>
+                <h3 class="font-bold">{dispatcher.api_url}</h3>
                 <div class="grow" />
                 <IconButton 
                     kind=ButtonKind::Button 
