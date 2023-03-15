@@ -1,11 +1,18 @@
-use common::*;
-
 use crate::components::{
     repositories::*,
     dispatchers::*,
 };
 
+use crate::models::{
+    repositories::*,
+    dispatchers::*,
+    params::*,
+};
+
+use common::*;
+
 use leptos::*;
+use web_sys::window;
 
 const STORAGE_KEY_PREFIX: &str = "azure-nextflow-ui";
 
@@ -24,7 +31,7 @@ pub fn StatusPage(cx: Scope) -> impl IntoView {
 
     // Save repositories to local storage
     create_effect(cx, move |_| {
-        if let Ok(Some(storage)) = window().local_storage() {
+        if let Ok(Some(storage)) = window().unwrap().local_storage() {
             let objs = repos.get().items;
             
             let json = serde_json::to_string(&objs).expect("Couldn't serialize repositories.");
@@ -38,7 +45,7 @@ pub fn StatusPage(cx: Scope) -> impl IntoView {
 
     // Save dispatchers to local storage
     create_effect(cx, move |_| {
-        if let Ok(Some(storage)) = window().local_storage() {
+        if let Ok(Some(storage)) = window().unwrap().local_storage() {
             let objs = dispatchers.get().items;
             
             let json = serde_json::to_string(&objs).expect("Couldn't serialize dispatchers.");

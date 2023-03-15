@@ -1,12 +1,25 @@
-use common::*;
-use web_sys::MouseEvent;
-use web_sys::Event;
-
 use crate::components::{
     icons::*,
 };
 
+use crate::models::{
+    repositories::*,
+    dispatchers::*,
+};
+
+use crate::controllers::{
+    actions::*,
+    loaders::*,
+};
+
+use common::*;
+
 use leptos::*;
+
+use web_sys::{
+    Event,
+    MouseEvent,
+};
 
 #[component]
 fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
@@ -146,7 +159,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let action = create_action(cx, 
         |input: &(String, bool, DispatchReq)| {
             let input = input.clone();
-            async move { Actions::web_action_dispatch_workflow_new(input.0, input.1, input.2).await }
+            async move { Actions::web_action_dispatch_workflow(input.0, input.1, input.2).await }
         } 
     );
     provide_context(cx, show_form);

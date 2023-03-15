@@ -1,4 +1,5 @@
 mod components;
+mod controllers;
 mod models;
 mod pages;
 
