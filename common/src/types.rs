@@ -8,7 +8,7 @@ pub use serde_json::{
 };
 
 pub use uuid::Uuid;
-
+pub use web_sys::window;
 /// Part of Message struct: message.metadata.workflow 
 #[allow(non_snake_case)]
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -121,7 +121,7 @@ pub struct NextflowWorkflow {
 }
 
 /// Minified struct for rendering repository
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NextflowRepo {
     pub id: Uuid,
     pub org: String,
@@ -147,6 +147,23 @@ pub struct NextflowRepos {
 impl NextflowRepos {
     pub fn new() -> Self {
         Self::mock_load()
+    }
+
+    pub fn load(storage_key: &String) -> Self {
+        let items: Vec<NextflowRepo> = if let Ok(Some(storage)) = window().unwrap().local_storage() {
+            storage
+                .get_item(&storage_key)
+                .ok()
+                .flatten()
+                .and_then(|value| {
+                    serde_json::from_str::<Vec<NextflowRepo>>(&value).ok()
+                })
+                .unwrap_or_default()
+        } else {
+            Vec::new()
+        };
+
+        Self { items }
     }
 
     pub fn mock_load() -> Self {
@@ -175,7 +192,7 @@ impl NextflowRepos {
 }
 
 /// Minified struct for rendering dispatcher
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NextflowDispatcher {
     pub id: Uuid,
     pub url: String,
@@ -199,6 +216,23 @@ pub struct NextflowDispatchers {
 impl NextflowDispatchers {
     pub fn new() -> Self {
         Self::mock_load()
+    }
+
+    pub fn load(storage_key: &String) -> Self {
+        let items: Vec<NextflowDispatcher> = if let Ok(Some(storage)) = window().unwrap().local_storage() {
+            storage
+                .get_item(&storage_key)
+                .ok()
+                .flatten()
+                .and_then(|value| {
+                    serde_json::from_str::<Vec<NextflowDispatcher>>(&value).ok()
+                })
+                .unwrap_or_default()
+        } else {
+            Vec::new()
+        };
+
+        Self { items }
     }
 
     pub fn mock_load() -> Self {

@@ -13,6 +13,8 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
     let repos = use_context::<ReadSignal<NextflowRepos>>(cx).unwrap();
     let set_repos = use_context::<WriteSignal<NextflowRepos>>(cx).unwrap();
 
+    let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
+
     let (show, set_show) = create_signal(cx, false);
     let (new_repo_org, set_new_repo_org) = create_signal(cx, "".to_string());
     let (new_repo_name, set_new_repo_name) = create_signal(cx, "".to_string());
@@ -97,13 +99,23 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
                     </div>
                     </div>
                 </Show>
-                <IconButton 
-                    kind=ButtonKind::Button 
-                    colour=Some(IconColour::Blue)
-                    icon="add-outline".to_string() 
-                    label="Add repository".to_string() 
-                    on_click=on_click_add
-                />
+                <Show
+                    when={move || !dispatchers.get().is_empty()}
+                    fallback={move |cx| view! {cx,
+                        <Icon
+                            colour=Some(IconColour::Disabled)
+                            icon="add-outline".to_string() 
+                        />
+                    }}
+                >
+                    <IconButton 
+                        kind=ButtonKind::Button 
+                        colour=Some(IconColour::Blue)
+                        icon="add-outline".to_string() 
+                        label="Add repository".to_string() 
+                        on_click=on_click_add
+                    />
+                </Show>
             </div>
             <ul>
                 <For

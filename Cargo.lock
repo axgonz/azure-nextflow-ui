@@ -620,6 +620,7 @@ dependencies = [
  "serde",
  "serde_json",
  "uuid",
+ "web-sys",
 ]
 
 [[package]]
@@ -2266,6 +2267,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "uuid",
+ "web-sys",
 ]
 
 [[package]]
