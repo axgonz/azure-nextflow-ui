@@ -32,7 +32,7 @@ pub fn StatusPage(cx: Scope) -> impl IntoView {
             let objs = repos.get().items;
             
             let json = serde_json::to_string(&objs).expect("Couldn't serialize repositories.");
-            log!("Saving to local storage: {:#?}", &json);
+            // log!("Saving to local storage: {:#?}", &json);
 
             if storage.set_item(&repos_store, &json).is_err() {
                 log!("Error while trying to set item in local storage");
@@ -46,7 +46,7 @@ pub fn StatusPage(cx: Scope) -> impl IntoView {
             let objs = dispatchers.get().items;
             
             let json = serde_json::to_string(&objs).expect("Couldn't serialize dispatchers.");
-            log!("Saving to local storage: {:#?}", &json);
+            // log!("Saving to local storage: {:#?}", &json);
 
             if storage.set_item(&dispatchers_store, &json).is_err() {
                 log!("Error while trying to set item in local storage");

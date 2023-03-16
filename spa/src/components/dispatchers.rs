@@ -23,14 +23,10 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
     let (f_dispatcher_config, set_f_dispatcher_config) = create_signal(cx, "".to_string());
     
     let on_click_add = move |_| {
-        log!("{:#?}", show.get());
         set_show.update(|b| *b = !*b);
     };
 
     let on_click_save = move |_| {
-        log!("save: {}", f_dispatcher_url.get());
-        log!("save: {}", f_dispatcher_config.get());
-
         set_dispatchers.update(
             |dispatchers| dispatchers.add(
                 NextflowDispatcher::new(
@@ -47,10 +43,9 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
     };
     
     let on_click_cancel = move |_| {
-        log!("cancel");
         set_f_dispatcher_url.set("".to_string());
         set_f_dispatcher_config.set("".to_string());
-        set_show.update(|b| *b = !*b) 
+        set_show.update(|b| *b = !*b)
     };
 
     let on_input_url = move |ev| {

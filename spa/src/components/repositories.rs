@@ -26,13 +26,10 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
     let (new_repo_name, set_new_repo_name) = create_signal(cx, "".to_string());
     
     let on_click_add = move |_| {
-        log!("{:#?}", show.get());
         set_show.update(|b| *b = !*b);
     };
 
     let on_click_save = move |_| {
-        log!("save: {}/{}", new_repo_org.get(), new_repo_name.get());
-
         set_repos.update(
             |repos| repos.add(
                 NextflowRepo::new(
@@ -49,7 +46,6 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
     };
     
     let on_click_cancel = move |_| {
-        log!("cancel");
         set_new_repo_org.set("".to_string());
         set_new_repo_name.set("".to_string());
         set_show.update(|b| *b = !*b) 
