@@ -8,6 +8,7 @@ use crate::models::{
 };
 
 use crate::controllers::{
+    actions::*,
     loaders::*,
 };
 
@@ -93,9 +94,15 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
         move || count.get(), 
         move |_| { 
             let dispatcher = dispatcher_for_loader.to_owned();
-            async { Loaders::web_load_dispatcher_messages(dispatcher).await }
+            async { Loaders::web_load_dispatcher_messages(dispatcher, 32).await }
         }
     );
+    let action = create_action(cx, 
+        |input: &(String, u8, bool)| {
+            let input = input.clone();
+            async move { Actions::web_action_dispatcher_messages_dequeue(input.0, input.1, input.2).await }
+        } 
+    );    
     
     let fallback = move || view! { cx, <p>"Loading..."</p> };
     // let messages = move || loader.read(cx).unwrap_or_default().into_iter().rev().collect::<Vec<Message>>();
@@ -108,6 +115,18 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     let on_click_delete = {
         move |_| set_dispatchers.update(|t| t.remove(dispatcher.id))
     };
+
+    let api_url = dispatcher.api_url.clone();
+    let on_click_dequeue = move |_| {
+        action.dispatch(
+            (
+                api_url.to_owned(),
+                1,
+                false,
+            )
+        );
+        set_count.update(|n| *n += 1)
+    };
     
     view! { cx,
         <li>
@@ -119,16 +138,26 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
                     colour=Some(IconColour::Red)
                     icon="layers-outline".to_string() 
                     label="Dequeue messages".to_string()  
-                    on_click={|_| ()} 
+                    on_click=on_click_dequeue
                 />
                 <div class="w-2" />
-                <IconButton 
-                    kind=ButtonKind::Button 
-                    colour=Some(IconColour::Gray)
-                    icon="refresh-outline".to_string() 
-                    label="Refresh messages".to_string() 
-                    on_click=on_click_refresh
-                />
+                <Show 
+                    when={move || messages().iter().count() < 32}
+                    fallback={move |_cx| view!{cx, 
+                        <Icon
+                            colour=Some(IconColour::Disabled)
+                            icon="refresh-outline".to_string() 
+                        />
+                    }}
+                >
+                    <IconButton 
+                        kind=ButtonKind::Button 
+                        colour=Some(IconColour::Gray)
+                        icon="refresh-outline".to_string() 
+                        label="Refresh messages".to_string() 
+                        on_click=on_click_refresh
+                    />
+                </Show>
                 <div class="w-2" />
                 <IconButton 
                     kind=ButtonKind::Button 

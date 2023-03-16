@@ -1,5 +1,7 @@
 use common::*;
 
+use super::loaders::Loaders;
+
 pub struct Actions {}
 
 impl Actions {
@@ -11,4 +13,8 @@ impl Actions {
 
         return result
     } 
+
+    pub async fn web_action_dispatcher_messages_dequeue(api_url: String, count: u8, dequeue: bool) -> Vec<Message> {
+        return Loaders::web_load_queue_message(api_url, count, dequeue).await
+    }    
 }

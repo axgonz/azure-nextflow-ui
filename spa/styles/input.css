@@ -17,3 +17,11 @@ ul li:hover ul li button {
 ul li:hover ul li:hover button {
     display: flex;
 }
+
+ul li .icon {
+    display: none;
+}
+
+ul li:hover .icon {
+    display: flex;
+}

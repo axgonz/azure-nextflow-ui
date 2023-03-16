@@ -8,23 +8,21 @@ use common::*;
 pub struct Loaders {}
 
 impl Loaders {
-    pub async fn web_load_queue_message(url: String) -> Vec<Message> { 
+    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool) -> Vec<Message> { 
         let req_uri: String = format!("{}/api/nxfutil/status", url);
-        let req_body = r#"{
-                "summary": false,
-                "message_count": 32,
-                "dequeue": false
-            }"#;
-
-        let req_json: Value = serde_json::from_str(req_body).unwrap();
-        let res = WebHelpers::web_post(&req_uri, &req_json).await.unwrap();
+        let req = StatusReq {
+            summary: false,
+            message_count: count,
+            dequeue: dequeue
+        };
+        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap()).await.unwrap();
         let messages: Vec<Message> = res.json().await.unwrap();
 
         return messages
     }
 
-    pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher) -> Vec<Message> {
-        return Self::web_load_queue_message(dispatcher.api_url).await
+    pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher, count: u8) -> Vec<Message> {
+        return Self::web_load_queue_message(dispatcher.api_url, count, false).await
     }
 
     pub async fn web_load_github_nextflow_workflow(project: NextflowProject) -> Vec<NextflowWorkflow> {

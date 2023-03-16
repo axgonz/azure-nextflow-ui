@@ -8,6 +8,14 @@ pub use serde_json::{
 };
 
 pub use uuid::Uuid;
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct StatusReq {
+    pub summary: bool,
+    pub message_count: u8,
+    pub dequeue: bool
+}
+
 /// Part of Message struct: message.metadata.workflow 
 #[allow(non_snake_case)]
 #[derive(Debug, Clone, Deserialize, Serialize)]

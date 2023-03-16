@@ -75,7 +75,7 @@ pub fn Icon(cx: Scope,
         None => IconColour::Blue
     };
 
-    let mut class: String = "flex text-white font-bold py-1 px-1 rounded".to_string();
+    let mut class: String = "icon flex text-white font-bold py-1 px-1 rounded".to_string();
     match colour {
         IconColour::Blue        => {class = format!("{} bg-blue-500", class)},
         IconColour::Red         => {class = format!("{} bg-red-500", class)},
