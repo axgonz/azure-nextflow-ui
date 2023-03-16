@@ -1,47 +1,63 @@
-use crate::models::{
-    app_state::AppState
+use crate::components::{
+    repositories::*,
+    dispatchers::*,
 };
 
-use crate::components::{
-    progress_bar::*,
+use crate::models::{
+    repositories::*,
+    dispatchers::*,
 };
 
 use leptos::*;
+use web_sys::window;
+
+const STORAGE_KEY_PREFIX: &str = "azure-nextflow-ui";
 
 #[component]
 pub fn HomePage(cx: Scope) -> impl IntoView {
-    // Find global state form cx
-    let data = use_context::<RwSignal<AppState>>(cx).expect("state to have been provided");
+    let repos_store = format!("{}-repositories", STORAGE_KEY_PREFIX);
+    let dispatchers_store = format!("{}-dispatchers", STORAGE_KEY_PREFIX);
 
-    // `create_slice` lets us create a "lens" into the data
-    let (global_count, set_global_count) = create_slice(
-        cx,
-        // we take a slice *from* `state`
-        data,
-        // our getter returns a "slice" of the data
-        |data| data.count,
-        // our setter describes how to mutate that slice, given a new value
-        |data, n| data.count = n,
-    );
+    let (repos, set_repos) = create_signal(cx, NextflowRepos::load(&repos_store));
+    provide_context(cx, repos);
+    provide_context(cx, set_repos);
 
-    // Define on_click function
-    let on_click_global = move |_| set_global_count.set(global_count.get() + 1);
+    let (dispatchers, set_dispatchers) = create_signal(cx, NextflowDispatchers::load(&dispatchers_store));
+    provide_context(cx, dispatchers);
+    provide_context(cx, set_dispatchers);
 
-    // Local count
-    let (count, set_count) = create_signal(cx, 0);
-    let on_click = move |_| set_count.update(|n| *n += 1);
-    let _double_count = move || count.get() * 2;
+    // Save repositories to local storage
+    create_effect(cx, move |_| {
+        if let Ok(Some(storage)) = window().unwrap().local_storage() {
+            let objs = repos.get().items;
+            
+            let json = serde_json::to_string(&objs).expect("Couldn't serialize repositories.");
+            // log!("Saving to local storage: {:#?}", &json);
+
+            if storage.set_item(&repos_store, &json).is_err() {
+                log!("Error while trying to set item in local storage");
+            }
+        }
+    });
+
+    // Save dispatchers to local storage
+    create_effect(cx, move |_| {
+        if let Ok(Some(storage)) = window().unwrap().local_storage() {
+            let objs = dispatchers.get().items;
+            
+            let json = serde_json::to_string(&objs).expect("Couldn't serialize dispatchers.");
+            // log!("Saving to local storage: {:#?}", &json);
+
+            if storage.set_item(&dispatchers_store, &json).is_err() {
+                log!("Error while trying to set item in local storage");
+            }
+        }
+    });    
 
     view! { cx,
-        <div class="flex flex-col space-x-4 space-y-4">
-            <div class="text-4xl">"Home Page"</div>
-            <ProgressBar max=2 value=count/>
-            <button on:click=on_click class:red={move || count.get() & 1 == 1} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-64">
-                "Count: " {move|| count.get()}
-            </button>
-            <button on:click=on_click_global class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-64">
-                "Global Count: " {move || global_count.get()}
-            </button>        
+        <div class="flex flex-wrap">
+            <Repositories />
+            <Dispatchers />
         </div>
     }
 }

@@ -60,47 +60,47 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
     };
 
     view!{cx,
-        <div class="my-1 mx-2">
+        <Show 
+            when={move || show.get()}
+            fallback=|_cx| view! {cx, }
+        >
+            <div class="absolute inset-0 bg-black bg-opacity-30 h-screen w-full flex justify-center items-start md:items-center pt-10 md:pt-0">
+            <div class="bg-gray-100 rounded px-4 py-4">
+            <div class="flex">
+                <h2 class="text-xl">"Add repository"</h2>
+                <div class="grow" />
+                <IconButton 
+                    kind=ButtonKind::Button 
+                    colour=Some(IconColour::Gray)
+                    icon="close-outline".to_string() 
+                    label="Cancel".to_string() 
+                    on_click=on_click_cancel
+                />
+            </div>
+            <div class="flex flex-col">
+                <label class="rounded">"Organization"</label>
+                <input class="px-2 rounded mb-2" id="org" type="text" on:input=on_input_org prop:value={move || new_repo_org.get()}/>
+                
+                <label class="rounded">"Repository"</label>
+                <input class="px-2 rounded mb-2" id="rep" type="text" on:input=on_input_name prop:value={ move || new_repo_name.get()}/>
+                
+                <div class="flex">
+                    <div class="grow"/>
+                    <IconButton 
+                        kind=ButtonKind::Button 
+                        colour=Some(IconColour::Blue)
+                        icon="save-outline".to_string() 
+                        label="Save".to_string() 
+                        on_click=on_click_save
+                    />
+                </div>
+            </div>
+            </div>
+            </div>
+        </Show>        
+        <div class="my-1 mx-2 grow max-w-4xl">
             <div class="flex">
                 <h3 class="grow text-xl">"Workflows"</h3>
-                <Show 
-                    when={move || show.get()}
-                    fallback=|_cx| view! {cx, }
-                >
-                    <div class="absolute inset-0 bg-black bg-opacity-30 h-screen w-full flex justify-center items-start md:items-center pt-10 md:pt-0">
-                    <div class="bg-gray-100 rounded px-4 py-4">
-                    <div class="flex">
-                        <h2>"Add repository"</h2>
-                        <div class="grow" />
-                        <IconButton 
-                            kind=ButtonKind::Button 
-                            colour=Some(IconColour::Gray)
-                            icon="close-outline".to_string() 
-                            label="Cancel".to_string() 
-                            on_click=on_click_cancel
-                        />
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="rounded">"Organization"</label>
-                        <input id="org" type="text" on:input=on_input_org prop:value={move || new_repo_org.get()}/>
-                        
-                        <label class="rounded">"Repository"</label>
-                        <input id="rep" type="text" on:input=on_input_name prop:value={ move || new_repo_name.get()}/>
-
-                        <div class="flex">
-                            <div class="grow"/>
-                            <IconButton 
-                                kind=ButtonKind::Button 
-                                colour=Some(IconColour::Blue)
-                                icon="save-outline".to_string() 
-                                label="Save".to_string() 
-                                on_click=on_click_save
-                            />
-                        </div>
-                    </div>
-                    </div>
-                    </div>
-                </Show>
                 <Show
                     when={move || !dispatchers.get().is_empty()}
                     fallback={move |cx| view! {cx,

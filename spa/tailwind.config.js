@@ -4,7 +4,11 @@ module.exports = {
       files: ["*.html", "./src/**/*.rs"],
     },
     theme: {
-      extend: {},
+      extend: {
+        colors: {
+          // 'purple-cx': '#0A465B',
+        },
+      },
     },
     plugins: [],
 }

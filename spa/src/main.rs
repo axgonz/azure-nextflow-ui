@@ -14,7 +14,6 @@ use crate::models::{
 use crate::pages::{
     home_page::*,
     about_page::*,
-    status_page::*,
 };
 
 use leptos::*;
@@ -34,14 +33,13 @@ pub fn App(cx: Scope) -> impl IntoView {
     
     view! {
         cx,
-        <Title text="Welcome to Leptos"/>
+        <Title text="Nxfutil"/>
         <Router>
             <NavBar />
             <main>
                 <Routes>
                     <Route path="/" view=|cx| view! { cx, <HomePage/> }/>
                     <Route path="/about" view=|cx| view! { cx, <AboutPage/> }/>
-                    <Route path="/status" view=|cx| view! { cx, <StatusPage/> }/>
                 </Routes>
             </main>
         </Router>

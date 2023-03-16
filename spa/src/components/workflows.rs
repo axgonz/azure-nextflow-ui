@@ -126,7 +126,7 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
             <div class="absolute inset-0 bg-black bg-opacity-30 h-screen w-full flex justify-center items-start md:items-center pt-10 md:pt-0">
             <div class="bg-gray-100 rounded px-4 py-4">
             <div class="flex">
-                <h2 class="w-64">"Dispatch workflow"</h2>
+                <h2 class="w-64 text-xl">"Dispatch workflow"</h2>
                 <div class="grow" />
                 <IconButton 
                     kind=ButtonKind::Button 
@@ -138,24 +138,24 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
             </div>
             <div class="flex flex-col">               
                 <label class="rounded">"Repository"</label>
-                <input type="text" value={format!("{}/{}", &workflow.project.org, &workflow.project.repo)} readonly/>
+                <input class="px-2 rounded mb-2" type="text" value={format!("{}/{}", &workflow.project.org, &workflow.project.repo)} readonly/>
 
                 <label class="rounded">"Project"</label>
-                <input type="text" value={&workflow.project.name} readonly/>
+                <input class="px-2 rounded mb-2" type="text" value={&workflow.project.name} readonly/>
 
                 <label class="rounded">"Dispatcher"</label>
-                <input type="text" value={dispatchers.get().api_url()} readonly/>                
+                <input class="px-2 rounded mb-2" type="text" value={dispatchers.get().api_url()} readonly/>                
 
                 <label class="rounded">"Config"</label>
-                <input type="text" value={request.get().config_uri} readonly/>
+                <input class="px-2 rounded mb-2" type="text" value={request.get().config_uri} readonly/>
 
                 <label class="rounded">"Pipeline"</label>
-                <input type="text" value={request.get().pipeline_uri} readonly/>
+                <input class="px-2 rounded mb-2" type="text" value={request.get().pipeline_uri} readonly/>
 
                 <label class="rounded">"Parameters"</label>
-                <input type="text" value={request.get().parameters_uri} readonly/>
+                <input class="px-2 rounded mb-2" type="text" value={request.get().parameters_uri} readonly/>
 
-                <div class="flex">
+                <div class="flex mb-2">
                     <label class="rounded">"Auto delete"</label>
                     <div class="grow" />
                     <input id="toggle_auto_delete" type="checkbox"
@@ -164,7 +164,7 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                     />
                 </div>
 
-                <div class="flex">
+                <div class="flex mb-2">
                     <label class="rounded">"What if"</label>
                     <div class="grow" />
                     <input id="toggle_what_if" type="checkbox"
@@ -178,7 +178,7 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                     when={|| true}
                     fallback={move |_cx| view! {cx, }}
                 >
-                    <ul>
+                    <ul class="mb-2">
                     <For
                         each={move || params.get().items}
                         key={|param| param.id }
@@ -209,17 +209,18 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 </Show>
 
                 <div class="flex">
-                    <input id="add-param-name" type="text" placeholder="name" 
+                    <input class="px-2 rounded mb-2" id="add-param-name" type="text" placeholder="name" 
                         node_ref=ref_add_param_name
                         on:input=update_add_param_name 
                         param:value={move || f_add_param_name.get()}
                     />
-                    <input id="add-param-value" type="text" placeholder="value" 
+                    <div class="w-2" />
+                    <input class="px-2 rounded mb-2" id="add-param-value" type="text" placeholder="value" 
                         node_ref=ref_add_param_value
                         on:input=update_add_param_value 
                         param:value={move || f_add_param_value.get()}
                     />
-                    <div class="grow" />
+                    <div class="w-2" />
                     <IconButton
                         colour=Some(IconColour::Gray)
                         icon="add-outline".to_string()
@@ -277,9 +278,9 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
         <DispatchForm workflow=workflow_for_form />        
         <li class="my-2 py-1 px-2 bg-gray-200 rounded">
             <div class="flex">
-                <a href={&workflow.project.html_url} class="mr-2">{&workflow.project.name}</a>
-                <a href={&workflow.pipeline.url} class="mr-2">{&workflow.pipeline.name}</a>
-                <a href={&workflow.parameters.url} class="mr-2">{&workflow.parameters.name}</a>
+                <a href={&workflow.project.html_url} class="mr-2 hover:underline" target="_blank">{&workflow.project.name}</a>
+                <a href={&workflow.pipeline.url} class="mr-2 hover:underline" target="_blank">{&workflow.pipeline.name}</a>
+                <a href={&workflow.parameters.url} class="mr-2 hover:underline" target="_blank">{&workflow.parameters.name}</a>
                 <div class="grow" />
                 <Show 
                     when={move || (pending.get() || dispatchers.get().is_empty()) }
@@ -289,7 +290,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                             view! { cx, 
                                 <IconButton 
                                     kind=ButtonKind::Button
-                                    colour=Some(IconColour::Green)
+                                    colour=Some(IconColour::Blue)
                                     icon="play-outline".to_string() 
                                     label="Dispatch workflow".to_string() 
                                     on_click=toggle_show_form
@@ -317,7 +318,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 when={move || pending.get() && submitted.get().is_some()}
                 fallback={|_cx| view! { cx, }}
             >
-                <pre class="overflow-auto" id="json">{
+                <pre class="m2-t rounded px-1 overflow-auto" id="json">{
                     move || {
                         if submitted.get().is_some() {
                             format!("{:#?}", submitted.get().unwrap())
@@ -335,7 +336,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 when={move || !pending.get() && dispatch_res.get().is_some()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="bg-green-100 overflow-auto" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
+                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
             </Show>
         </li>
     }

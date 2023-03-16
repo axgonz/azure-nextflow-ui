@@ -64,7 +64,7 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
             <div class="absolute inset-0 bg-black bg-opacity-30 h-screen w-full flex justify-center items-start md:items-center pt-10 md:pt-0">
             <div class="bg-gray-100 rounded px-4 py-4">
             <div class="flex">
-                <h2>"Add dispatcher"</h2>
+                <h2 class="text-xl">"Add dispatcher"</h2>
                 <div class="grow" />
                 <IconButton 
                     kind=ButtonKind::Button 
@@ -76,10 +76,10 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
             </div>
             <div class="flex flex-col">
                 <label class="rounded">"Api url"</label>
-                <input id="api" type="text" on:input=on_input_url prop:value={ move || f_dispatcher_url.get()}/>
+                <input class="px-2 rounded mb-2" id="api" type="text" placeholder="https://funcapp.azurewebsites.net" on:input=on_input_url prop:value={ move || f_dispatcher_url.get()}/>
                 
                 <label class="rounded">"Config url"</label>
-                <input id="cfg" type="text" on:input=on_input_config prop:value={ move || f_dispatcher_config.get()}/>
+                <input class="px-2 rounded mb-2" id="cfg" type="text" placeholder="https://raw.githubusercontent.com/.../nextflow.config" on:input=on_input_config prop:value={ move || f_dispatcher_config.get()}/>
 
                 <div class="flex">
                     <div class="grow"/>
@@ -95,7 +95,7 @@ pub fn Dispatchers(cx: Scope) -> impl IntoView {
             </div>
             </div>
         </Show>
-        <div class="my-1 mx-2">
+        <div class="my-1 mx-2 grow max-w-4xl">
             <div class="flex">
                 <h3 class="grow text-xl">"Dispatchers"</h3>
                 <Show 

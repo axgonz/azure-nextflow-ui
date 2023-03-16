@@ -19,15 +19,13 @@ use leptos::*;
 #[component]
 fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
     let (show_params, set_show_params) = create_signal(cx, false);
+    let (show_errors, set_show_errors) = create_signal(cx, false);
+
     let toggle_show_params = move |_| set_show_params.update(|is_set| *is_set = !*is_set);
 
-    let (show_errors, _set_show_errors) = create_signal(cx, true);
-    // let toggle_show_errors = move |_| set_show_errors.update(|is_set| *is_set = !*is_set);
-
-    // let mut has_error_message: bool = false;
     let error_message: String = match message.metadata.workflow.errorMessage {
         Some(value) => {
-            // has_error_message = true;
+            set_show_errors.set(true);
             value
         },
         None => "".to_string()
@@ -45,23 +43,28 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
                 <div class="mr-2 w-24">{message.event}</div>
                 <div class="mr-2">{message.runName}</div>
                 <div class="grow"></div>
-                
-                // // Toggle errors button
-                // <Show 
-                //     when={move || has_error_message}
-                //     fallback=|_cx| view! { cx, }
-                // >
-                //     <RedButton text="Errors".to_string() on_click=toggle_show_errors />
-                // </Show>
-                            
+                                          
                 // Toggle params button 
-                <IconButton 
-                    kind=ButtonKind::Button
-                    colour=Some(IconColour::Blue)
-                    icon="chevron-down-outline".to_string() 
-                    label="Show parameters".to_string()  
-                    on_click=toggle_show_params 
-                />
+                <Show 
+                    when={move || show_params.get()}
+                    fallback={move |cx| view!{cx,
+                        <IconButton 
+                            kind=ButtonKind::Button
+                            colour=Some(IconColour::Blue)
+                            icon="chevron-down-outline".to_string() 
+                            label="Show parameters".to_string()  
+                            on_click=toggle_show_params 
+                        />
+                    }}
+                >
+                    <IconButton 
+                        kind=ButtonKind::Button
+                        colour=Some(IconColour::Blue)
+                        icon="chevron-up-outline".to_string() 
+                        label="Hide parameters".to_string()  
+                        on_click=toggle_show_params 
+                    />
+                </Show>
             </div> 
 
             // Errors  
@@ -69,15 +72,15 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
                 when={move || show_errors.get()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="bg-red-100 overflow-auto" id="json">{&error_message}</pre>
+                <pre class="mt-2 bg-red-100 rounded px-1 overflow-auto" id="json">{&error_message}</pre>
             </Show>
 
             // Params
             <Show 
-            when={move || show_params.get()}
-            fallback=|_cx| view! { cx, }
+                when={move || show_params.get()}
+                fallback=|_cx| view! { cx, }
             >
-                <pre class="bg-blue-100 overflow-auto" id="json">{format!("{:#}",&message.metadata.parameters)}</pre>
+                <pre class="mt-2 bg-gray-700 rounded px-1 text-white overflow-auto" id="json">{format!("{:#}",&message.metadata.parameters)}</pre>
             </Show>
         </li>
     }
