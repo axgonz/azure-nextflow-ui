@@ -98,9 +98,9 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
         }
     );
     let action = create_action(cx, 
-        |input: &(String, u8, bool)| {
+        |input: &(String, u8)| {
             let input = input.clone();
-            async move { Actions::web_action_dispatcher_messages_dequeue(input.0, input.1, input.2).await }
+            async move { Actions::web_action_dispatcher_messages_dequeue(input.0, input.1).await }
         } 
     );    
     
@@ -121,8 +121,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
         action.dispatch(
             (
                 api_url.to_owned(),
-                1,
-                false,
+                1
             )
         );
         set_count.update(|n| *n += 1)
