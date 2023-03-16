@@ -88,6 +88,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     let set_dispatchers = use_context::<WriteSignal<NextflowDispatchers>>(cx).unwrap();
 
     let (count, set_count) = create_signal(cx, 0);
+    let (rev_messages, set_rev_messages) = create_signal(cx, false);
 
     let dispatcher_for_loader = dispatcher.clone();   
     let loader = create_resource(cx, 
@@ -105,8 +106,15 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     );    
     
     let fallback = move || view! { cx, <p>"Loading..."</p> };
-    // let messages = move || loader.read(cx).unwrap_or_default().into_iter().rev().collect::<Vec<Message>>();
-    let messages = move || loader.read(cx).unwrap_or_default();
+
+    let messages = move || {
+        if rev_messages.get() {
+            loader.read(cx).unwrap_or_default().into_iter().rev().collect::<Vec<Message>>()
+        }
+        else {
+            loader.read(cx).unwrap_or_default()
+        }
+    };
 
     let on_click_refresh = {
         move |_| set_count.update(|n| *n += 1)
@@ -114,6 +122,11 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
 
     let on_click_delete = {
         move |_| set_dispatchers.update(|t| t.remove(dispatcher.id))
+    };
+
+    let on_click_rev_messages = move |_| {
+        set_rev_messages.update(|b| *b = !*b);
+        set_count.update(|n| *n += 1)
     };
 
     let api_url = dispatcher.api_url.clone();
@@ -132,6 +145,27 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
             <div class="pt-2 flex">
                 <h3 class="font-bold">{dispatcher.api_url}</h3>
                 <div class="grow" />
+                <Show 
+                    when={move || rev_messages.get()}
+                    fallback={move |_cx| view!{cx, 
+                        <IconButton 
+                            kind=ButtonKind::Button 
+                            colour=Some(IconColour::Gray)
+                            icon="arrow-up-outline".to_string() 
+                            label="Sort oldest on bottom".to_string() 
+                            on_click=on_click_rev_messages
+                        />
+                    }}
+                >
+                    <IconButton 
+                        kind=ButtonKind::Button 
+                        colour=Some(IconColour::Gray)
+                        icon="arrow-down-outline".to_string() 
+                        label="Sort oldest on top".to_string() 
+                        on_click=on_click_rev_messages
+                    />
+                </Show>
+                <div class="w-2" />
                 <IconButton 
                     kind=ButtonKind::Button
                     colour=Some(IconColour::Red)
