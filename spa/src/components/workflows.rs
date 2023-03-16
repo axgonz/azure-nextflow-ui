@@ -5,6 +5,7 @@ use crate::components::{
 use crate::models::{
     repositories::*,
     dispatchers::*,
+    params::*,
 };
 
 use crate::controllers::{
@@ -16,6 +17,7 @@ use common::*;
 
 use leptos::*;
 
+use leptos::html::Input;
 use web_sys::{
     Event,
     MouseEvent,
@@ -40,10 +42,10 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
             auto_delete: true
         }
     );
-
-    log!("{:#?}", request.get());
-
     let (f_what_if, set_f_what_if) = create_signal(cx, true);
+    let (params, set_params) = create_signal(cx, DispatchParams::new());
+    let (f_add_param_name, set_f_add_param_name) = create_signal(cx, "".to_string());
+    let (f_add_param_value, set_f_add_param_value) = create_signal(cx, "".to_string());
 
     // Form inputs
     let toggle_show = move |_: MouseEvent| {
@@ -64,10 +66,49 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let toggle_what_if = move |ev: Event| {
         set_f_what_if.set(event_target_checked(&ev));
     };
+    let update_add_param_name = move |ev: Event| {
+        set_f_add_param_name.set(event_target_value(&ev))
+    };
+    let update_add_param_value = move |ev: Event| {
+        set_f_add_param_value.set(event_target_value(&ev))
+    };
+
+    // Form NodeRefs
+    let ref_add_param_name: NodeRef::<Input> = create_node_ref(cx);
+    let ref_add_param_value: NodeRef::<Input> = create_node_ref(cx);
 
     // Form action
+    let on_click_add_param = move |_| {
+        let node_add_param_name = ref_add_param_name.get().unwrap();
+        let node_add_param_value = ref_add_param_value.get().unwrap();
+
+        set_params.update(
+            |params| params.add(
+                DispatchParam::new(
+                    Uuid::new_v4(),
+                    f_add_param_name.get(),
+                    f_add_param_value.get()
+                )
+            )
+        );
+            
+        set_f_add_param_name.set("".to_string());
+        set_f_add_param_value.set("".to_string());
+        
+        node_add_param_name.set_value("");
+        node_add_param_value.set_value("");
+    };
+
     let on_click_confirm = move |mouse_event: MouseEvent| {
         toggle_show(mouse_event);
+
+        set_request.update(|req| 
+            req.parameters_json = params.get().items
+            .iter()
+            .map(DispatchReqParam::from)
+            .collect::<Vec<DispatchReqParam>>()
+        );
+
         action.dispatch(
             (
                 dispatchers.get().api_url(),
@@ -130,7 +171,63 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                         prop:checked={move || f_what_if.get()}
                         on:input=toggle_what_if
                     />
-                </div>                
+                </div>
+
+                <p>"Parameter overrides"</p>
+                <Show
+                    when={|| true}
+                    fallback={move |_cx| view! {cx, }}
+                >
+                    <ul>
+                    <For
+                        each={move || params.get().items}
+                        key={|param| param.id }
+                        view={move |cx, param| {
+                            view! {
+                                cx, 
+                                <li>
+                                    <div class="flex">
+                                        <div>{format!("--{}", param.name)}</div>
+                                        <pre>" "</pre>
+                                        <div>{param.value}</div>
+                                        <div class="grow" />
+                                        <IconButton
+                                            colour=Some(IconColour::Gray)
+                                            icon="trash-outline".to_string()
+                                            kind=ButtonKind::Button
+                                            label="Add parameter".to_string()
+                                            on_click={move |_| { 
+                                                set_params.update(|params| params.remove(param.id))
+                                            }}
+                                        />
+                                    </div>
+                                </li>
+                            }
+                        }}
+                    />
+                    </ul>
+                </Show>
+
+                <div class="flex">
+                    <input id="add-param-name" type="text" placeholder="name" 
+                        node_ref=ref_add_param_name
+                        on:input=update_add_param_name 
+                        param:value={move || f_add_param_name.get()}
+                    />
+                    <input id="add-param-value" type="text" placeholder="value" 
+                        node_ref=ref_add_param_value
+                        on:input=update_add_param_value 
+                        param:value={move || f_add_param_value.get()}
+                    />
+                    <div class="grow" />
+                    <IconButton
+                        colour=Some(IconColour::Gray)
+                        icon="add-outline".to_string()
+                        kind=ButtonKind::Button
+                        label="Add parameter".to_string()
+                        on_click=on_click_add_param
+                    />
+                </div>                     
                
                 <div class="flex">
                     <div class="grow"/>
@@ -214,11 +311,13 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                     </Show>
                 </Show>
             </div> 
+
+            // Request
             <Show 
                 when={move || pending.get() && submitted.get().is_some()}
                 fallback={|_cx| view! { cx, }}
             >
-                <pre id="json">{
+                <pre class="overflow-auto" id="json">{
                     move || {
                         if submitted.get().is_some() {
                             format!("{:#?}", submitted.get().unwrap())
@@ -230,11 +329,13 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 }
                 </pre>
             </Show>
+            
+            // Response
             <Show 
                 when={move || !pending.get() && dispatch_res.get().is_some()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="bg-green-100" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
+                <pre class="bg-green-100 overflow-auto" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
             </Show>
         </li>
     }
@@ -273,18 +374,18 @@ pub fn Workflows(cx: Scope, repo: NextflowRepo) -> impl IntoView {
                 <div class="grow" />
                 <IconButton 
                     kind=ButtonKind::Button 
-                    colour=Some(IconColour::Red)
-                    icon="trash-outline".to_string() 
-                    label="Remove repository".to_string() 
-                    on_click=on_click_delete
-                />
-                <div class="w-2" />
-                <IconButton 
-                    kind=ButtonKind::Button 
                     colour=Some(IconColour::Gray)
                     icon="refresh-outline".to_string() 
                     label="Refresh repository".to_string() 
                     on_click=on_click_refresh
+                />
+                <div class="w-2" />
+                <IconButton 
+                    kind=ButtonKind::Button 
+                    colour=Some(IconColour::Red)
+                    icon="trash-outline".to_string() 
+                    label="Remove repository".to_string() 
+                    on_click=on_click_delete
                 />
             </div>
             <Suspense fallback=fallback>

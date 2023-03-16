@@ -1,7 +1,7 @@
 pub mod types;
 pub use types::*; 
 
-use leptos::*;
+// use leptos::*;
 
 pub use reqwest::{
     Response,
@@ -17,11 +17,11 @@ impl WebHelpers {
             .send()
             .await {
             Ok(response) => {
-                log!("[reqwest] GET {:#?}...Ok", uri);
+                // log!("[reqwest] GET {:#?}...Ok", uri);
                 return Ok(response)
             }
             Err(error) => {
-                log!("[reqwest] GET {:#?}...Err", uri);
+                // log!("[reqwest] GET {:#?}...Err", uri);
                 return Err(error)
             }
         };
@@ -34,11 +34,11 @@ impl WebHelpers {
             .send()
             .await {
             Ok(response) => {
-                log!("[reqwest] POST {:#?}...Ok", uri);
+                // log!("[reqwest] POST {:#?}...Ok", uri);
                 return Ok(response)
             }
             Err(error) => {
-                log!("[reqwest] POST {:#?}...Err", uri);
+                // log!("[reqwest] POST {:#?}...Err", uri);
                 return Err(error)
             }
         };

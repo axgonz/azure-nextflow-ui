@@ -68,7 +68,7 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
                 when={move || show_errors.get()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="bg-red-100" id="json">{&error_message}</pre>
+                <pre class="bg-red-100 overflow-auto" id="json">{&error_message}</pre>
             </Show>
 
             // Params
@@ -76,7 +76,7 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
             when={move || show_params.get()}
             fallback=|_cx| view! { cx, }
             >
-                <pre class="bg-blue-100" id="json">{format!("{:#}",&message.metadata.parameters)}</pre>
+                <pre class="bg-blue-100 overflow-auto" id="json">{format!("{:#}",&message.metadata.parameters)}</pre>
             </Show>
         </li>
     }
@@ -98,6 +98,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     );
     
     let fallback = move || view! { cx, <p>"Loading..."</p> };
+    // let messages = move || loader.read(cx).unwrap_or_default().into_iter().rev().collect::<Vec<Message>>();
     let messages = move || loader.read(cx).unwrap_or_default();
 
     let on_click_refresh = {
@@ -114,11 +115,11 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
                 <h3 class="font-bold">{dispatcher.api_url}</h3>
                 <div class="grow" />
                 <IconButton 
-                    kind=ButtonKind::Button 
+                    kind=ButtonKind::Button
                     colour=Some(IconColour::Red)
-                    icon="trash-outline".to_string() 
-                    label="Remove dispatcher".to_string() 
-                    on_click=on_click_delete
+                    icon="layers-outline".to_string() 
+                    label="Dequeue messages".to_string()  
+                    on_click={|_| ()} 
                 />
                 <div class="w-2" />
                 <IconButton 
@@ -127,6 +128,14 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
                     icon="refresh-outline".to_string() 
                     label="Refresh messages".to_string() 
                     on_click=on_click_refresh
+                />
+                <div class="w-2" />
+                <IconButton 
+                    kind=ButtonKind::Button 
+                    colour=Some(IconColour::Red)
+                    icon="trash-outline".to_string() 
+                    label="Remove dispatcher".to_string() 
+                    on_click=on_click_delete
                 />
             </div>
             <Suspense fallback=fallback>
