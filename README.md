@@ -1,4 +1,6 @@
-# Web App
+# Nxfutil
+
+![nxfutil.png](./docs/nxfutil.png)
 
 Full-stack web template in Rust using [rust-actix-web-api](https://github.com/axgonz/rust-actix-web-api/blob/main/README.md#dev-dependencies) and [rust-leptos-spa](https://github.com/axgonz/rust-leptos-spa/blob/main/README.md#dev-dependencies) templates.
 
