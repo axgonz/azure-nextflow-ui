@@ -98,7 +98,7 @@ pub fn Repositories(cx: Scope) -> impl IntoView {
             </div>
             </div>
         </Show>        
-        <div class="my-1 mx-2 grow max-w-4xl">
+        <div class="my-1 mx-2 overflow-auto grow">
             <div class="flex">
                 <h3 class="grow text-xl">"Workflows"</h3>
                 <Show

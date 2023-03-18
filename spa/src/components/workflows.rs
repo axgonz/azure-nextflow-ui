@@ -28,9 +28,9 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
 
     // Get our form pre-reqs from parent (cx)
-    let show_form = use_context::<ReadSignal<bool>>(cx).unwrap();
-    let set_show_form = use_context::<WriteSignal<bool>>(cx).unwrap();
-    let action = use_context::<Action<(String, bool, DispatchReq), DispatchRes>>(cx).unwrap();
+    let show_form = use_context::<ReadSignal<bool>>(cx).expect("bad unwrap() @ use_context::<ReadSignal<bool>>(cx)");
+    let set_show_form = use_context::<WriteSignal<bool>>(cx).expect("bad unwrap() @ use_context::<WriteSignal<bool>>(cx))");
+    let action = use_context::<Action<(String, bool, DispatchReq), Vec<DispatchRes>>>(cx).expect("bad unwrap() @ use_context::<Action<(String, bool, DispatchReq)");
 
     // Form signals
     let (request, set_request) = create_signal(cx, 
@@ -257,7 +257,9 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let action = create_action(cx, 
         |input: &(String, bool, DispatchReq)| {
             let input = input.clone();
-            async move { Actions::web_action_dispatch_workflow(input.0, input.1, input.2).await }
+            async move { 
+                Actions::web_action_dispatch_workflow(input.0, input.1, input.2).await 
+            }
         } 
     );
     provide_context(cx, show_form);
@@ -275,7 +277,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let dispatch_res = action.value(); 
 
     view! { cx,
-        <DispatchForm workflow=workflow_for_form />        
+        <DispatchForm workflow=workflow_for_form />  
         <li class="my-2 py-1 px-2 bg-gray-200 rounded">
             <div class="flex">
                 <a href={&workflow.project.html_url} class="mr-2 hover:underline" target="_blank">{&workflow.project.name}</a>
@@ -286,7 +288,6 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                     when={move || (pending.get() || dispatchers.get().is_empty()) }
                     fallback={
                         move |cx| {
-                            // let on_click = on_click.to_owned();
                             view! { cx, 
                                 <IconButton 
                                     kind=ButtonKind::Button
@@ -318,7 +319,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 when={move || pending.get() && submitted.get().is_some()}
                 fallback={|_cx| view! { cx, }}
             >
-                <pre class="m2-t rounded px-1 overflow-auto" id="json">{
+                <pre class="m2-t rounded px-1 overflow-auto text-ellipsis" id="json">{
                     move || {
                         if submitted.get().is_some() {
                             format!("{:#?}", submitted.get().unwrap())
@@ -336,7 +337,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 when={move || !pending.get() && dispatch_res.get().is_some()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
+                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto text-ellipsis" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
             </Show>
         </li>
     }

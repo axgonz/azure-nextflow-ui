@@ -4,6 +4,7 @@ use crate::models::{
 };
 
 use common::*;
+use leptos::log;
 
 pub struct Loaders {}
 
@@ -15,10 +16,33 @@ impl Loaders {
             message_count: count,
             dequeue: dequeue
         };
-        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap()).await.unwrap();
-        let messages: Vec<Message> = res.json().await.unwrap();
-
-        return messages
+        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap(), 3).await;
+      
+        match res {
+            Ok(res) => {
+                match res.status() {
+                    StatusCode::OK => {
+                        match res.json().await {
+                            Ok(json) => {
+                                return json
+                            }
+                            Err(error) => {
+                                log!("Returning an empty {} because there is no JSON:\n{:#?}", "Vec<Message>", error);
+                                return vec![]
+                            }
+                        }
+                    }
+                    _ => {
+                        log!("Returning an empty {} because of {:#?} status code.", "Vec<Message>", res.status());
+                        return vec![]
+                    }
+                }
+            }
+            Err(error) => {
+                log!("Returning an empty {} because of error:\n{:#?}", "Vec<Message>", error);
+                return vec![]
+            }
+        }
     }
 
     pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher, count: u8) -> Vec<Message> {
@@ -26,8 +50,33 @@ impl Loaders {
     }
 
     pub async fn web_load_github_nextflow_workflow(project: NextflowProject) -> Vec<NextflowWorkflow> {
-        let res = WebHelpers::web_get(&project.url).await.unwrap();
-        let files: Vec<GitHubFile> = res.json().await.unwrap();
+        let res = WebHelpers::web_get(&project.url, 0).await;
+        
+        let files: Vec<GitHubFile> = match res {
+            Ok(res) => {
+                match res.status() {
+                    StatusCode::OK => {
+                        match res.json().await {
+                            Ok(json) => {
+                                json
+                            }
+                            Err(error) => {
+                                log!("Returning an empty {} because there is no JSON:\n{:#?}", "Vec<NextflowWorkflow>", error);
+                                vec![]
+                            }
+                        }
+                    }
+                    _ => {
+                        log!("Returning an empty {} because of {:#?} status code.", "Vec<NextflowWorkflow>", res.status());
+                        vec![]
+                    }
+                }
+            }
+            Err(error) => {
+                log!("Returning an empty {} because of error:\n{:#?}", "Vec<NextflowWorkflow>", error);
+                vec![]
+            }
+        };
 
         let mut nf_files: Vec<(String, String)> = vec![];
         let mut json_files: Vec<(String, String)> = vec![];
@@ -66,8 +115,33 @@ impl Loaders {
 
     pub async fn web_load_github_nextflow_projects(org: String, repo: String) -> Vec<NextflowProject> {
         let uri = format!("https://api.github.com/repos/{}/{}/contents/nextflow/pipelines", org, repo);
-        let res = WebHelpers::web_get(&uri).await.unwrap();
-        let dirs: Vec<GitHubDir> = res.json().await.unwrap();
+        let res = WebHelpers::web_get(&uri, 0).await;
+
+        let dirs: Vec<GitHubDir> = match res {
+            Ok(res) => {
+                match res.status() {
+                    StatusCode::OK => {
+                        match res.json().await {
+                            Ok(json) => {
+                                json
+                            }
+                            Err(error) => {
+                                log!("Returning an empty {} because there is no JSON:\n{:#?}", "Vec<NextflowProject>", error);
+                                vec![]
+                            }
+                        }
+                    }
+                    _ => {
+                        log!("Returning an empty {} because of {:#?} status code.", "Vec<NextflowProject>", res.status());
+                        vec![]
+                    }
+                }
+            }
+            Err(error) => {
+                log!("Returning an empty {} because of error:\n{:#?}", "Vec<NextflowProject>", error);
+                vec![]
+            }
+        };
         
         let mut nextflow_projects: Vec<NextflowProject> = vec![];
         for dir in dirs {
@@ -83,7 +157,6 @@ impl Loaders {
                 );
             }
         }
-
         return nextflow_projects
     }    
 

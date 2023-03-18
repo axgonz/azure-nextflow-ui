@@ -72,7 +72,7 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
                 when={move || show_errors.get()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="mt-2 bg-red-100 rounded px-1 overflow-auto" id="json">{&error_message}</pre>
+                <pre class="mt-2 bg-red-100 rounded px-1 overflow-auto text-ellipsis" id="json">{&error_message}</pre>
             </Show>
 
             // Params
@@ -80,7 +80,7 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
                 when={move || show_params.get()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="mt-2 bg-gray-700 rounded px-1 text-white overflow-auto" id="json">{format!("{:#}",&message.metadata.parameters)}</pre>
+                <pre class="mt-2 bg-gray-700 rounded px-1 text-white overflow-auto text-ellipsis" id="json">{format!("{:#}",&message.metadata.parameters)}</pre>
             </Show>
         </li>
     }

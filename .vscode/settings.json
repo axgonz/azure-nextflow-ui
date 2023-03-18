@@ -5,9 +5,11 @@
     },
     "cSpell.words": [
         "Actix",
+        "Backoff",
         "Colour",
         "Leptos",
-        "reqwest"
+        "reqwest",
+        "whatif"
     ],
     "emmet.includeLanguages": {
         "rust": "html",
