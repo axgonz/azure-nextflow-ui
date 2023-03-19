@@ -46,7 +46,7 @@ impl WebHelpers {
     pub async fn web_get(
         uri: &String, mut retries: u8, access_token: Option<String>
     ) -> Result<Response, Error> {
-        let mut delay = 4;
+        let mut delay = 3;
         
         while retries > 0 {
             let result = Self::web_get_final(uri, access_token.clone()).await;
@@ -105,7 +105,7 @@ impl WebHelpers {
     pub async fn web_post(
         uri: &String, json: &Value, mut retries: u8, access_token: Option<String>
     ) -> Result<Response, Error> {
-        let mut delay = 4;
+        let mut delay = 3;
         
         while retries > 0 {
             let result = Self::web_post_final(uri, json, access_token.clone()).await;
