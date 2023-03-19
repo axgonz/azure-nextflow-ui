@@ -42,9 +42,6 @@ pub fn Auth(cx: Scope) -> impl IntoView {
                     REDIRECT_URL.to_string(),
                 ).await {
                     Ok(auth) => {
-                        // if auth.access_token.is_some() {
-                        //     access_token.set(Some(auth.access_token.unwrap().secret().clone()));
-                        // };
                         Some(auth)
                     }
                     Err(_) => {
@@ -68,7 +65,7 @@ pub fn Auth(cx: Scope) -> impl IntoView {
 
         // Navigate user to issuer
         if location.assign(&loader_begin.read(cx).unwrap().auth_url.unwrap()).is_err(){
-            log!("Unable to navigate login url");
+            log!("Unable to navigate to login url");
         };
     };
 
@@ -82,8 +79,8 @@ pub fn Auth(cx: Scope) -> impl IntoView {
         loader_begin.read(cx).unwrap().clear_refresh_token();
 
         // Navigate user to home
-        if location.assign("/").is_err(){
-            log!("Unable to navigate login url");
+        if location.assign("/logout").is_err(){
+            log!("Unable to navigate to logout url");
         };
     };    
 
@@ -105,15 +102,16 @@ pub fn Auth(cx: Scope) -> impl IntoView {
                     loader_complete.read(cx).unwrap().unwrap().refresh_token.is_some()
                 {
                     access_token.set(Some(
-                        serde_json::to_string(&loader_complete
+                        loader_complete
                             .read(cx)
                             .unwrap()
                             .unwrap()
                             .access_token
                             .unwrap()
+                            .secret()
                             .clone()
-                        ).unwrap()
-                    ));
+                        )
+                    );
                     b = true
                 }
             }

@@ -24,7 +24,7 @@ impl WebHelpers {
         let req = match access_token{
             Some(access_token) => {
                 client.get(uri)
-                    .header(header::AUTHORIZATION, access_token)
+                    .header(header::AUTHORIZATION, format!("Bearer {}", access_token))
             }
             None => {
                 client.get(uri)
@@ -81,7 +81,7 @@ impl WebHelpers {
         let req = match access_token{
             Some(access_token) => {
                 client.post(uri)
-                    .header(header::AUTHORIZATION, access_token)
+                    .header(header::AUTHORIZATION, format!("Bearer {}", access_token))
                     .json(json)
             }
             None => {
