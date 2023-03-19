@@ -1,6 +1,8 @@
 use leptos::*;
 use leptos_router::*;
 
+use crate::components::{auth::*};
+
 #[component]
 pub fn NavBar(cx: Scope) -> impl IntoView {
     view! { cx,
@@ -8,6 +10,8 @@ pub fn NavBar(cx: Scope) -> impl IntoView {
         <div class="flex space-x-4 px-2 py-3 mx-1 my-1 rounded bg-gray-700 text-white">
             <A href="/">"Home"</A>
             <A href="/about">"About"</A>
+            <div class="grow" />
+            <Auth />
         </div>
     }
 }

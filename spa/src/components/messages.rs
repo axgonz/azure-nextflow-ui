@@ -89,6 +89,7 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
 #[component]
 pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     let set_dispatchers = use_context::<WriteSignal<NextflowDispatchers>>(cx).unwrap();
+    let access_token = use_context::<RwSignal<Option<String>>>(cx).unwrap();
 
     let (count, set_count) = create_signal(cx, 0);
     let (rev_messages, set_rev_messages) = create_signal(cx, false);
@@ -98,13 +99,13 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
         move || count.get(), 
         move |_| { 
             let dispatcher = dispatcher_for_loader.to_owned();
-            async { Loaders::web_load_dispatcher_messages(dispatcher, 32).await }
+            async move { Loaders::web_load_dispatcher_messages(dispatcher, 32, access_token.get()).await }
         }
     );
     let action = create_action(cx, 
-        |input: &(String, u8)| {
+        |input: &(String, u8, Option<String>)| {
             let input = input.clone();
-            async move { Actions::web_action_dispatcher_messages_dequeue(input.0, input.1).await }
+            async move { Actions::web_action_dispatcher_messages_dequeue(input.0, input.1, input.2).await }
         } 
     );    
     
@@ -137,7 +138,8 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
         action.dispatch(
             (
                 api_url.to_owned(),
-                1
+                1,
+                access_token.get()
             )
         );
         set_count.update(|n| *n += 1)

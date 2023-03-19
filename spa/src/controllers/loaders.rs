@@ -9,14 +9,14 @@ use leptos::log;
 pub struct Loaders {}
 
 impl Loaders {
-    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool) -> Vec<Message> { 
+    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool, access_token: Option<String>) -> Vec<Message> { 
         let req_uri: String = format!("{}/api/nxfutil/status", url);
         let req = StatusReq {
             summary: false,
             message_count: count,
             dequeue: dequeue
         };
-        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap(), 3).await;
+        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap(), 3, access_token).await;
       
         match res {
             Ok(res) => {
@@ -45,12 +45,12 @@ impl Loaders {
         }
     }
 
-    pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher, count: u8) -> Vec<Message> {
-        return Self::web_load_queue_message(dispatcher.api_url, count, false).await
+    pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher, count: u8, access_token: Option<String>) -> Vec<Message> {
+        return Self::web_load_queue_message(dispatcher.api_url, count, false, access_token).await
     }
 
-    pub async fn web_load_github_nextflow_workflow(project: NextflowProject) -> Vec<NextflowWorkflow> {
-        let res = WebHelpers::web_get(&project.url, 0).await;
+    pub async fn web_load_github_nextflow_workflow(project: NextflowProject, access_token: Option<String>) -> Vec<NextflowWorkflow> {
+        let res = WebHelpers::web_get(&project.url, 0, access_token).await;
         
         let files: Vec<GitHubFile> = match res {
             Ok(res) => {
@@ -113,9 +113,9 @@ impl Loaders {
         return nextflow_workflows
     }
 
-    pub async fn web_load_github_nextflow_projects(org: String, repo: String) -> Vec<NextflowProject> {
+    pub async fn web_load_github_nextflow_projects(org: String, repo: String, access_token: Option<String>) -> Vec<NextflowProject> {
         let uri = format!("https://api.github.com/repos/{}/{}/contents/nextflow/pipelines", org, repo);
-        let res = WebHelpers::web_get(&uri, 0).await;
+        let res = WebHelpers::web_get(&uri, 0, access_token).await;
 
         let dirs: Vec<GitHubDir> = match res {
             Ok(res) => {
@@ -160,17 +160,19 @@ impl Loaders {
         return nextflow_projects
     }    
 
-    pub async fn web_load_github_nextflow_workflows(repo: NextflowRepo) -> Vec<NextflowWorkflow> {
+    pub async fn web_load_github_nextflow_workflows(repo: NextflowRepo, access_token: Option<String>) -> Vec<NextflowWorkflow> {
         let mut projects: Vec<NextflowProject> = vec![];
         projects.append(&mut Self::web_load_github_nextflow_projects(
             repo.org, 
-            repo.name
+            repo.name,
+            access_token.clone()
         ).await);
     
         let mut workflows: Vec<NextflowWorkflow> = vec![];
         for project in projects {
             workflows.append(&mut Self::web_load_github_nextflow_workflow(
-                project
+                project,
+                access_token.clone()
             ).await);
         }
     

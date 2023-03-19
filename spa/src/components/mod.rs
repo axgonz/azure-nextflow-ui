@@ -7,3 +7,4 @@ pub mod workflows;
 pub mod buttons;
 pub mod icons;
 pub mod date_time;
+pub mod auth;

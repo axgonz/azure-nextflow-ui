@@ -22,7 +22,8 @@ use leptos_meta::*;
 
 #[component]
 pub fn App(cx: Scope) -> impl IntoView {
-    // log!("Hello Log! (from App component)");
+    let access_token = create_rw_signal(cx, None::<String>);
+    provide_context(cx, access_token);
 
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context(cx);
@@ -40,6 +41,8 @@ pub fn App(cx: Scope) -> impl IntoView {
                 <Routes>
                     <Route path="/" view=|cx| view! { cx, <HomePage/> }/>
                     <Route path="/about" view=|cx| view! { cx, <AboutPage/> }/>
+                    <Route path="/login" view=|cx| view! { cx, <HomePage/> }/>
+                    <Route path="/logout" view=|cx| view! { cx, <AboutPage/> }/>
                 </Routes>
             </main>
         </Router>
