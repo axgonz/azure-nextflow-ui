@@ -9,7 +9,8 @@ use leptos::*;
 use openidconnect::AccessToken;
 
 use web_sys::{
-    window, MouseEvent,
+    window, 
+    MouseEvent,
 };
 
 const CLIENT_SECRET: Option<String> = None;
@@ -102,6 +103,7 @@ pub fn Auth(cx: Scope) -> impl IntoView {
                 if loader_complete.read(cx).unwrap().unwrap().access_token.is_some() &&
                     loader_complete.read(cx).unwrap().unwrap().refresh_token.is_some()
                 {
+                    // Make the access token available as a signal
                     access_token.set(
                         loader_complete
                             .read(cx)
