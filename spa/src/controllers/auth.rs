@@ -1,3 +1,5 @@
+use crate::env::*;
+
 use openidconnect::{
     AuthorizationCode,
     ClientId,
@@ -101,7 +103,7 @@ impl Auth {
                 CsrfToken::new_random,
                 Nonce::new_random,
             )
-            .add_scope(Scope::new("api://695bb8cf-d2bc-4f11-af37-63a127714558/user_impersonation".to_string()))
+            .add_scope(Scope::new(API_SCOPE.to_string()))
             .set_pkce_challenge(pkce_challenge)
             .url();
 

@@ -1,3 +1,5 @@
+use crate::env::*;
+
 use crate::controllers::{
     auth::*,
 };
@@ -8,10 +10,7 @@ use web_sys::{
     window, MouseEvent,
 };
 
-const CLIENT_ID: &str = "4ebc62d5-0c5e-45c8-9dc2-21dfa6898ca5";
 const CLIENT_SECRET: Option<String> = None;
-const ISSUER_URL: &str = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-const REDIRECT_URL: &str = "http://localhost:8080/login";
 
 #[component]
 pub fn Auth(cx: Scope) -> impl IntoView {
