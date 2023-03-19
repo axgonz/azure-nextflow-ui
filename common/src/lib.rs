@@ -5,6 +5,7 @@ use leptos::log;
 
 use std::time::Duration;
 use async_std::task;
+use openidconnect::AccessToken;
 
 pub use reqwest::{
     Response,
@@ -17,14 +18,14 @@ pub struct WebHelpers {}
 
 impl WebHelpers {
     pub async fn web_get_final(
-        uri: &String, access_token: Option<String>
+        uri: &String, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let client = reqwest::Client::new();
 
         let req = match access_token{
             Some(access_token) => {
                 client.get(uri)
-                    .header(header::AUTHORIZATION, format!("Bearer {}", access_token))
+                    .header(header::AUTHORIZATION, format!("Bearer {}", access_token.secret()))
             }
             None => {
                 client.get(uri)
@@ -44,7 +45,7 @@ impl WebHelpers {
     }   
 
     pub async fn web_get(
-        uri: &String, mut retries: u8, access_token: Option<String>
+        uri: &String, mut retries: u8, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let mut delay = 3;
         
@@ -74,14 +75,14 @@ impl WebHelpers {
     }    
 
     pub async fn web_post_final(
-        uri: &String, json: &Value, access_token: Option<String>
+        uri: &String, json: &Value, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let client = reqwest::Client::new();
 
         let req = match access_token{
             Some(access_token) => {
                 client.post(uri)
-                    .header(header::AUTHORIZATION, format!("Bearer {}", access_token))
+                    .header(header::AUTHORIZATION, format!("Bearer {}", access_token.secret()))
                     .json(json)
             }
             None => {
@@ -103,7 +104,7 @@ impl WebHelpers {
     }
 
     pub async fn web_post(
-        uri: &String, json: &Value, mut retries: u8, access_token: Option<String>
+        uri: &String, json: &Value, mut retries: u8, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let mut delay = 3;
         

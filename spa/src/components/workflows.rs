@@ -18,6 +18,7 @@ use common::*;
 use leptos::*;
 
 use leptos::html::Input;
+use openidconnect::AccessToken;
 use web_sys::{
     Event,
     MouseEvent,
@@ -26,12 +27,12 @@ use web_sys::{
 #[component]
 fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     let dispatchers = use_context::<ReadSignal<NextflowDispatchers>>(cx).unwrap();
-    let access_token = use_context::<RwSignal<Option<String>>>(cx).unwrap();
+    let access_token = use_context::<RwSignal<Option<AccessToken>>>(cx).unwrap();
     
     // Get our form pre-reqs from parent (cx)
     let show_form = use_context::<ReadSignal<bool>>(cx).expect("bad unwrap() @ use_context::<ReadSignal<bool>>(cx)");
     let set_show_form = use_context::<WriteSignal<bool>>(cx).expect("bad unwrap() @ use_context::<WriteSignal<bool>>(cx))");
-    let action = use_context::<Action<(String, bool, DispatchReq, Option<String>), Vec<DispatchRes>>>(cx).expect("bad unwrap() @ use_context::<Action<(String, bool, DispatchReq)");
+    let action = use_context::<Action<(String, bool, DispatchReq, Option<AccessToken>), Vec<DispatchRes>>>(cx).expect("bad unwrap() @ use_context::<Action<(String, bool, DispatchReq)");
 
     // Form signals
     let (request, set_request) = create_signal(cx, 
@@ -257,7 +258,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     // Setup our form pre-reqs
     let (show_form, set_show_form) = create_signal(cx, false);
     let action = create_action(cx, 
-        |input: &(String, bool, DispatchReq, Option<String>)| {
+        |input: &(String, bool, DispatchReq, Option<AccessToken>)| {
             let input = input.clone();
             async move { 
                 Actions::web_action_dispatch_workflow(input.0, input.1, input.2, input.3).await 

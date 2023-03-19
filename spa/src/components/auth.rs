@@ -6,6 +6,8 @@ use crate::controllers::{
 
 use leptos::*;
 
+use openidconnect::AccessToken;
+
 use web_sys::{
     window, MouseEvent,
 };
@@ -14,7 +16,7 @@ const CLIENT_SECRET: Option<String> = None;
 
 #[component]
 pub fn Auth(cx: Scope) -> impl IntoView {
-    let access_token = use_context::<RwSignal<Option<String>>>(cx).unwrap();
+    let access_token = use_context::<RwSignal<Option<AccessToken>>>(cx).unwrap();
 
     let loader_begin = create_resource(cx, 
         move || (), 
@@ -100,16 +102,12 @@ pub fn Auth(cx: Scope) -> impl IntoView {
                 if loader_complete.read(cx).unwrap().unwrap().access_token.is_some() &&
                     loader_complete.read(cx).unwrap().unwrap().refresh_token.is_some()
                 {
-                    access_token.set(Some(
+                    access_token.set(
                         loader_complete
                             .read(cx)
                             .unwrap()
                             .unwrap()
                             .access_token
-                            .unwrap()
-                            .secret()
-                            .clone()
-                        )
                     );
                     b = true
                 }

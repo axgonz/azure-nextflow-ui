@@ -20,10 +20,11 @@ use crate::pages::{
 use leptos::*;
 use leptos_router::*;
 use leptos_meta::*;
+use openidconnect::AccessToken;
 
 #[component]
 pub fn App(cx: Scope) -> impl IntoView {
-    let access_token = create_rw_signal(cx, None::<String>);
+    let access_token = create_rw_signal(cx, None::<AccessToken>);
     provide_context(cx, access_token);
 
     // Provides context that manages stylesheets, titles, meta tags, etc.

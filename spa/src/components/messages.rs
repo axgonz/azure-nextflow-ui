@@ -15,6 +15,7 @@ use crate::controllers::{
 use common::*;
 
 use leptos::*;
+use openidconnect::AccessToken;
 
 #[component]
 fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
@@ -89,7 +90,7 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
 #[component]
 pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     let set_dispatchers = use_context::<WriteSignal<NextflowDispatchers>>(cx).unwrap();
-    let access_token = use_context::<RwSignal<Option<String>>>(cx).unwrap();
+    let access_token = use_context::<RwSignal<Option<AccessToken>>>(cx).unwrap();
 
     let (count, set_count) = create_signal(cx, 0);
     let (rev_messages, set_rev_messages) = create_signal(cx, false);
@@ -103,7 +104,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
         }
     );
     let action = create_action(cx, 
-        |input: &(String, u8, Option<String>)| {
+        |input: &(String, u8, Option<AccessToken>)| {
             let input = input.clone();
             async move { Actions::web_action_dispatcher_messages_dequeue(input.0, input.1, input.2).await }
         } 

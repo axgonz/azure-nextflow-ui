@@ -756,6 +756,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "leptos",
+ "openidconnect",
  "reqwest",
  "serde",
  "serde_json",
