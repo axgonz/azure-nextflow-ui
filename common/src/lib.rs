@@ -17,7 +17,7 @@ pub use reqwest::{
 pub struct WebHelpers {}
 
 impl WebHelpers {
-    pub async fn web_get_final(
+    pub async fn web_get(
         uri: &String, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let client = reqwest::Client::new();
@@ -26,6 +26,7 @@ impl WebHelpers {
             Some(access_token) => {
                 client.get(uri)
                     .header(header::AUTHORIZATION, format!("Bearer {}", access_token.secret()))
+                    .header(header::CACHE_CONTROL, "public, max-age=3")
             }
             None => {
                 client.get(uri)
@@ -44,13 +45,13 @@ impl WebHelpers {
         };
     }   
 
-    pub async fn web_get(
+    pub async fn web_get_retry(
         uri: &String, mut retries: u8, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let mut delay = 3;
         
         while retries > 0 {
-            let result = Self::web_get_final(uri, access_token.clone()).await;
+            let result = Self::web_get(uri, access_token.clone()).await;
        
             match result {
                 Ok(result) => {
@@ -71,10 +72,10 @@ impl WebHelpers {
         }
         
         // If we make it this far we are returning an error or a non-200 response 
-        Self::web_get_final(uri, access_token).await
+        Self::web_get(uri, access_token).await
     }    
 
-    pub async fn web_post_final(
+    pub async fn web_post(
         uri: &String, json: &Value, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let client = reqwest::Client::new();
@@ -83,13 +84,14 @@ impl WebHelpers {
             Some(access_token) => {
                 client.post(uri)
                     .header(header::AUTHORIZATION, format!("Bearer {}", access_token.secret()))
+                    .header(header::CACHE_CONTROL, "public, max-age=3")
                     .json(json)
             }
             None => {
                 client.post(uri)
                     .json(json)
             }
-        };
+        };       
 
         match req.send().await {
             Ok(response) => {
@@ -103,13 +105,13 @@ impl WebHelpers {
         }
     }
 
-    pub async fn web_post(
+    pub async fn web_post_retry(
         uri: &String, json: &Value, mut retries: u8, access_token: Option<AccessToken>
     ) -> Result<Response, Error> {
         let mut delay = 3;
-        
+
         while retries > 0 {
-            let result = Self::web_post_final(uri, json, access_token.clone()).await;
+            let result = Self::web_post(uri, json, access_token.clone()).await;
 
             match result {
                 Ok(result) => {
@@ -130,6 +132,6 @@ impl WebHelpers {
         }
         
         // If we make it this far we are returning an error or a non-200 response 
-        Self::web_post_final(uri, json, access_token).await
+        Self::web_post(uri, json, access_token).await
     }
 }  

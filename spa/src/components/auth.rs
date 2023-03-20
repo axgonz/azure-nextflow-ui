@@ -18,6 +18,7 @@ const CLIENT_SECRET: Option<String> = None;
 #[component]
 pub fn Auth(cx: Scope) -> impl IntoView {
     let access_token = use_context::<RwSignal<Option<AccessToken>>>(cx).unwrap();
+    let messages_refresh_trigger = use_context::<RwSignal<i32>>(cx).unwrap();
 
     let loader_begin = create_resource(cx, 
         move || (), 
@@ -111,6 +112,10 @@ pub fn Auth(cx: Scope) -> impl IntoView {
                             .unwrap()
                             .access_token
                     );
+                    
+                    // Refresh our page data (signals)
+                    messages_refresh_trigger.update(|n| *n += 1);
+
                     b = true
                 }
             }

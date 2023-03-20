@@ -91,13 +91,13 @@ fn DisplayMessage(cx: Scope, message: Message) -> impl IntoView {
 pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     let set_dispatchers = use_context::<WriteSignal<NextflowDispatchers>>(cx).unwrap();
     let access_token = use_context::<RwSignal<Option<AccessToken>>>(cx).unwrap();
+    let messages_refresh_trigger = use_context::<RwSignal<i32>>(cx).unwrap();
 
-    let (count, set_count) = create_signal(cx, 0);
     let (rev_messages, set_rev_messages) = create_signal(cx, false);
 
     let dispatcher_for_loader = dispatcher.clone();   
     let loader = create_resource(cx, 
-        move || count.get(), 
+        move || messages_refresh_trigger.get(), 
         move |_| { 
             let dispatcher = dispatcher_for_loader.to_owned();
             async move { Loaders::web_load_dispatcher_messages(dispatcher, 32, access_token.get()).await }
@@ -122,7 +122,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
     };
 
     let on_click_refresh = {
-        move |_| set_count.update(|n| *n += 1)
+        move |_| messages_refresh_trigger.update(|n| *n += 1)
     };
 
     let on_click_delete = {
@@ -131,7 +131,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
 
     let on_click_rev_messages = move |_| {
         set_rev_messages.update(|b| *b = !*b);
-        set_count.update(|n| *n += 1)
+        messages_refresh_trigger.update(|n| *n += 1)
     };
 
     let api_url = dispatcher.api_url.clone();
@@ -143,7 +143,7 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
                 access_token.get()
             )
         );
-        set_count.update(|n| *n += 1)
+        messages_refresh_trigger.update(|n| *n += 1)
     };
     
     view! { cx,

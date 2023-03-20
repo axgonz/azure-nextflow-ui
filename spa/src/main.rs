@@ -27,6 +27,9 @@ pub fn App(cx: Scope) -> impl IntoView {
     let access_token = create_rw_signal(cx, None::<AccessToken>);
     provide_context(cx, access_token);
 
+    let messages_refresh_trigger = create_rw_signal(cx, 0);
+    provide_context(cx, messages_refresh_trigger);
+
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context(cx);
 

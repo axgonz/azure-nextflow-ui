@@ -17,7 +17,7 @@ impl Loaders {
             message_count: count,
             dequeue: dequeue
         };
-        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap(), 4, access_token).await;
+        let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap(), access_token).await;
       
         match res {
             Ok(res) => {
@@ -51,7 +51,7 @@ impl Loaders {
     }
 
     pub async fn web_load_github_nextflow_workflow(project: NextflowProject, access_token: Option<AccessToken>) -> Vec<NextflowWorkflow> {
-        let res = WebHelpers::web_get(&project.url, 0, access_token).await;
+        let res = WebHelpers::web_get(&project.url, access_token).await;
         
         let files: Vec<GitHubFile> = match res {
             Ok(res) => {
@@ -116,7 +116,7 @@ impl Loaders {
 
     pub async fn web_load_github_nextflow_projects(org: String, repo: String, access_token: Option<AccessToken>) -> Vec<NextflowProject> {
         let uri = format!("https://api.github.com/repos/{}/{}/contents/nextflow/pipelines", org, repo);
-        let res = WebHelpers::web_get(&uri, 0, access_token).await;
+        let res = WebHelpers::web_get(&uri, access_token).await;
 
         let dirs: Vec<GitHubDir> = match res {
             Ok(res) => {
