@@ -1,6 +1,8 @@
 use crate::components::{
     date_time::*,
     icons::*,
+    error_status::*,
+    error_message::*,
 };
 
 use crate::models::{
@@ -114,10 +116,10 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
 
     let messages = move || {
         if rev_messages.get() {
-            loader.read(cx).unwrap_or_default().into_iter().rev().collect::<Vec<Message>>()
+            loader.read(cx).unwrap_or_default().result.into_iter().rev().collect::<Vec<Message>>()
         }
         else {
-            loader.read(cx).unwrap_or_default()
+            loader.read(cx).unwrap_or_default().result
         }
     };
 
@@ -207,6 +209,15 @@ pub fn Messages(cx: Scope, dispatcher: NextflowDispatcher) -> impl IntoView {
                 />
             </div>
             <Suspense fallback=fallback>
+            <Show
+                when={move || loader.read(cx).is_some()}
+                fallback=|_cx| view! { cx, }
+            >
+                <div class = "flex mt-2 bg-red-100 px-1 rounded">
+                    <ErrorStatus msg=loader.read(cx).unwrap().error_status />
+                    <ErrorMessage msg=loader.read(cx).unwrap().error_message />
+                </div>
+            </Show>
             <ul>
                 <For
                     each=messages

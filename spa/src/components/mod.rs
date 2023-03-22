@@ -8,3 +8,5 @@ pub mod buttons;
 pub mod icons;
 pub mod date_time;
 pub mod auth;
+pub mod error_status;
+pub mod error_message;

@@ -1,5 +1,7 @@
 use crate::components::{
     icons::*,
+    error_status::*,
+    error_message::*,
 };
 
 use crate::models::{
@@ -32,7 +34,7 @@ fn DispatchForm(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
     // Get our form pre-reqs from parent (cx)
     let show_form = use_context::<ReadSignal<bool>>(cx).expect("bad unwrap() @ use_context::<ReadSignal<bool>>(cx)");
     let set_show_form = use_context::<WriteSignal<bool>>(cx).expect("bad unwrap() @ use_context::<WriteSignal<bool>>(cx))");
-    let action = use_context::<Action<(String, bool, DispatchReq, Option<AccessToken>), Vec<DispatchRes>>>(cx).expect("bad unwrap() @ use_context::<Action<(String, bool, DispatchReq)");
+    let action = use_context::<Action<(String, bool, DispatchReq, Option<AccessToken>), DispatchWorkflowRes>>(cx).expect("bad unwrap() @ use_context::<Action<(String, bool, DispatchReq)");
 
     // Form signals
     let (request, set_request) = create_signal(cx, 
@@ -261,7 +263,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
         |input: &(String, bool, DispatchReq, Option<AccessToken>)| {
             let input = input.clone();
             async move { 
-                Actions::web_action_dispatch_workflow(input.0, input.1, input.2, input.3).await 
+                Actions::web_action_dispatch_workflow(input.0, input.1, input.2, input.3).await
             }
         } 
     );
@@ -277,7 +279,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
 
     let submitted = action.input();
     let pending = action.pending();
-    let dispatch_res = action.value(); 
+    let dispatch_res = action.value();
 
     view! { cx,
         <DispatchForm workflow=workflow_for_form />  
@@ -287,6 +289,12 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 <a href={&workflow.pipeline.url} class="mr-2 hover:underline" target="_blank">{&workflow.pipeline.name}</a>
                 <a href={&workflow.parameters.url} class="mr-2 hover:underline" target="_blank">{&workflow.parameters.name}</a>
                 <div class="grow" />
+                <Show 
+                    when={move || !pending.get() && dispatch_res.get().is_some()}
+                    fallback=|_cx| view! { cx, }
+                >
+                    <ErrorStatus msg=dispatch_res.get().unwrap().error_status/>
+                </Show>
                 <Show 
                     when={move || (pending.get() || dispatchers.get().is_empty()) }
                     fallback={
@@ -340,7 +348,11 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 when={move || !pending.get() && dispatch_res.get().is_some()}
                 fallback=|_cx| view! { cx, }
             >
-                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto text-ellipsis" id="json">{move || format!("{:#?}", dispatch_res.get().unwrap())}</pre>
+                <ErrorMessage msg=dispatch_res.get().unwrap().error_message />
+                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto text-ellipsis" id="json">
+                    {move || format!("{:#?}", dispatch_res.get().unwrap().result)}
+                </pre>
+                <p></p>
             </Show>
         </li>
     }

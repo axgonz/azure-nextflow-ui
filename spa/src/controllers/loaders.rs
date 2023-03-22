@@ -7,10 +7,17 @@ use common::*;
 use leptos::log;
 use openidconnect::AccessToken;
 
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct GetMessagesRes {
+    pub result: Vec<Message>, 
+    pub error_status: Option<String>,   
+    pub error_message: Option<String>
+}
+
 pub struct Loaders {}
 
 impl Loaders {
-    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool, access_token: Option<AccessToken>) -> Vec<Message> { 
+    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool, access_token: Option<AccessToken>) -> GetMessagesRes { 
         let req_uri: String = format!("{}/api/nxfutil/status", url);
         let req = StatusReq {
             summary: false,
@@ -25,28 +32,48 @@ impl Loaders {
                     StatusCode::OK => {
                         match res.json().await {
                             Ok(json) => {
-                                return json
+                                return GetMessagesRes {
+                                    result: json,
+                                    error_status: None,
+                                    error_message: None,
+                                }
                             }
                             Err(error) => {
                                 log!("Returning an empty {} because there is no JSON:\n{:#?}", "Vec<Message>", error);
-                                return vec![]
+                                return GetMessagesRes {
+                                    result: vec![],
+                                    error_status: Some("BAD_JSON".to_string()),
+                                    error_message: Some("Unable to parse server response to JSON.".to_string()),
+                                }
                             }
                         }
                     }
                     _ => {
                         log!("Returning an empty {} because of {:#?} status code.", "Vec<Message>", res.status());
-                        return vec![]
+                        let error_message = match res.status().as_u16() {
+                            401 => "Unauthorized. Try logging out and back in again.",
+                            _ => "Request failed. Try sending the request again in a few seconds."
+                        };
+                        return GetMessagesRes {
+                            result: vec![],
+                            error_status: Some(res.status().as_u16().to_string()),
+                            error_message: Some(error_message.to_string()),
+                        }
                     }
                 }
             }
             Err(error) => {
                 log!("Returning an empty {} because of error:\n{:#?}", "Vec<Message>", error);
-                return vec![]
+                return GetMessagesRes {
+                    result: vec![],
+                    error_status: Some("ERROR".to_string()),
+                    error_message: Some("Request failed. Try sending the request again in a few seconds.".to_string()),
+                }
             }
         }
     }
 
-    pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher, count: u8, access_token: Option<AccessToken>) -> Vec<Message> {
+    pub async fn web_load_dispatcher_messages(dispatcher: NextflowDispatcher, count: u8, access_token: Option<AccessToken>) -> GetMessagesRes {
         return Self::web_load_queue_message(dispatcher.api_url, count, false, access_token).await
     }
 
