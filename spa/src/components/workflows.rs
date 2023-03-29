@@ -330,7 +330,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 when={move || pending.get() && submitted.get().is_some()}
                 fallback={|_cx| view! { cx, }}
             >
-                <pre class="m2-t rounded px-1 overflow-auto text-ellipsis" id="json">{
+                <pre class="m2-t rounded px-1 overflow-auto" id="json">{
                     move || {
                         if submitted.get().is_some() {
                             format!("{:#?}", submitted.get().unwrap())
@@ -349,7 +349,7 @@ fn DisplayWorkflow(cx: Scope, workflow: NextflowWorkflow) -> impl IntoView {
                 fallback=|_cx| view! { cx, }
             >
                 <ErrorMessage msg=dispatch_res.get().unwrap().error_message />
-                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto text-ellipsis" id="json">
+                <pre class="mt-2 bg-gray-700 text-white rounded px-1 overflow-auto" id="json">
                     {move || format!("{:#?}", dispatch_res.get().unwrap().result)}
                 </pre>
                 <p></p>

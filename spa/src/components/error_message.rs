@@ -9,7 +9,7 @@ pub fn ErrorMessage(cx: Scope, msg: Option<String>) -> impl IntoView {
             when={move || msg.get().is_some()}
             fallback={move |_cx| view!{cx, }}
         >
-            <div class="bg-red-100 rounded px-1 pb-1 overflow-auto text-ellipsis">
+            <div class="bg-red-100 rounded px-1 pb-1 overflow-auto">
                 {msg.get().unwrap()}
             </div>
         </Show>
