@@ -84,7 +84,7 @@ jobs:
       run: |
         echo 'pub const CLIENT_ID: &str = "${{ vars.AUTH_CLIENT_ID }}"' > spa/src/env.rs;
         echo 'pub const ISSUER_URL: &str = "${{ vars.AUTH_ISSUER_URL }}"' >> spa/src/env.rs;
-        echo 'pub const REDIRECT_URL: &str = "${{ steps.storageAccount.outputs.website }}"' >> spa/src/env.rs;
+        echo 'pub const REDIRECT_URL: &str = "${{ steps.storageAccount.outputs.website }}/login"' >> spa/src/env.rs;
         echo 'pub const API_SCOPE: &str = "${{ vars.AUTH_API_SCOPE }}"' >> spa/src/env.rs;
 
     # Update / Install Rust
