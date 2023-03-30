@@ -20,5 +20,7 @@
         "rust": "html",
         "*.rs": "html"
     },
-    "css.validate": false
+    "css.validate": false,
+    "trailing-spaces.trimOnSave": true,
+    "trailing-spaces.highlightCurrentLine": true
 }

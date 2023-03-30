@@ -8,7 +8,7 @@ concurrency:
   group: 'reusable-azure-deploy'
   cancel-in-progress: true
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       AZURE_STORAGEACCOUNT_NAME:
@@ -30,7 +30,7 @@ env:
   RUST_BACKTRACE: 'full'
   CARGO_TARGET: 'wasm32-unknown-unknown'
   LEPTOS_BIN_NAME: 'leptos'
-  LEPTOS_SOURCE_PATH: 'spa'  
+  LEPTOS_SOURCE_PATH: 'spa'
 
 jobs:
   rust_build_leptos:
@@ -77,9 +77,9 @@ jobs:
 
     # Checkout
     - name: 'Checkout repository branch'
-      uses: actions/checkout@v2   
+      uses: actions/checkout@v2
 
-    # Update env.rs 
+    # Update env.rs
     - name: Update env.rs
       run: |
         echo 'pub const CLIENT_ID: &str = "${{ vars.AUTH_CLIENT_ID }}";' > spa/src/env.rs;
@@ -105,11 +105,11 @@ jobs:
       with:
         path: '${{ env.LEPTOS_SOURCE_PATH }}/target'
         key: 'cargo-target-${{ env.LEPTOS_BIN_NAME }}'
-   
+
     # Install dev tools
     - name: 'Install dev tools'
       shell: bash
-      run: |       
+      run: |
         pushd '${{ env.LEPTOS_SOURCE_PATH }}'
         npm install
         popd
@@ -118,7 +118,7 @@ jobs:
     # Build
     - name: 'Build Leptos SPA using Trunk'
       shell: bash
-      run: |       
+      run: |
         pushd '${{ env.LEPTOS_SOURCE_PATH }}'
         npx tailwindcss -i styles/input.css -o styles/tailwind.css --minify
         popd
@@ -131,7 +131,7 @@ jobs:
       with:
         name: 'dist'
         path: 'dist/'
-   
+
     # Deployment
     - name: Deploy static website to ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
       id: azureResources
