@@ -91,7 +91,7 @@ jobs:
     - name: Archive dist directory
       uses: actions/upload-artifact@v3
       with:
-        name: '${{ env.LEPTOS_BIN_NAME }}'
+        name: 'dist'
         path: 'dist/'
    
   deploy:
@@ -140,7 +140,7 @@ jobs:
     - name: Download dist directory
       uses: actions/download-artifact@v3
       with:
-        name: ${{ env.LEPTOS_BIN_NAME }}
+        name: 'dist'
         path: './'
 
     # Deployment
