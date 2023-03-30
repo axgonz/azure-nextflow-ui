@@ -103,7 +103,7 @@ jobs:
       id: cache
       uses: actions/cache@v3
       with:
-        path: '${{ env.LEPTOS_SOURCE_PATH }}/target'
+        path: 'target'
         key: 'cargo-target-${{ env.LEPTOS_BIN_NAME }}'
 
     # Install dev tools
