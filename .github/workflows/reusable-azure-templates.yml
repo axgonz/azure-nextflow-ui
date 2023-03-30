@@ -73,7 +73,7 @@ jobs:
     - name: Archive binary
       uses: actions/upload-artifact@v3
       with:
-        name: '${{ LEPTOS_BIN_NAME }}'
+        name: '${{ env.LEPTOS_BIN_NAME }}'
         path: 'dist'
    
   deploy:
