@@ -1,0 +1,148 @@
+name: Azure - deploy
+
+permissions:
+      id-token: write
+      contents: read
+
+concurrency:
+  group: 'reusable-azure-templates'
+  cancel-in-progress: true
+
+on: 
+  workflow_call:
+    inputs:
+      AZURE_SUBSCRIPTION_ID:
+        type: string
+        description: 'Azure subscription id'
+        required: false
+      AZURE_STORAGEACCOUNT_NAME:
+        type: string
+        description: 'Azure storage account name'
+        required: false        
+
+env:
+  RUST_BACKTRACE: 'full'
+  CARGO_TARGET: 'x86_64-unknown-linux-gnu'
+  LEPTOS_BIN_NAME: 'leptos'
+  LEPTOS_SOURCE_PATH: 'spa'  
+
+jobs:
+  rust_build_leptos:
+    runs-on: ubuntu-latest
+    steps:
+    # Inputs
+    - name: 'Show inputs'
+      run: |
+        echo AZURE_SUBSCRIPTION_ID : ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+        echo AZURE_STORAGEACCOUNT_NAME : ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
+
+    # Checkout
+    - name: 'Checkout repository branch'
+      uses: actions/checkout@v2   
+
+    # Update / Install Rust
+    - name: 'Update / install rust'
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        target: ${{ env.CARGO_TARGET }}
+        toolchain: stable
+        default: true
+        override: true
+
+    # Cache
+    - name: 'Cache cargo target dir'
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: '${{ env.LEPTOS_SOURCE_PATH }}/target'
+        key: 'cargo-target-${{ env.LEPTOS_BIN_NAME }}'
+   
+    # Build
+    - name: 'Build Leptos SPA using Trunk'
+      shell: bash
+      run: |       
+        pushd '${{ env.LEPTOS_SOURCE_PATH }}'
+        npm install
+        npx tailwindcss -i styles/input.css -o styles/tailwind.css --minify
+        export TRUNK_BUILD_RELEASE=true
+        trunk build
+        popd
+
+    # Archive
+    - name: Archive binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: '${{ LEPTOS_BIN_NAME }}'
+        path: 'dist'
+   
+  deploy:
+    runs-on: ubuntu-latest 
+    steps:
+    # Inputs
+    - name: 'Show inputs'
+      run: |
+        echo AZURE_SUBSCRIPTION_ID : ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+        echo AZURE_STORAGEACCOUNT_NAME : ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
+
+    # Prase AZURE_MSI secret
+    - name: Prase AZURE_MSI secret
+      id: msiPrincipal
+      env:
+        SECRET: ${{ secrets.AZURE_MSI }}
+      run: |
+        clientId=$(echo $SECRET | jq -r '.["clientId"]')
+        tenantId=$(echo $SECRET | jq -r '.["tenantId"]')
+        subscriptionId=$(echo $SECRET | jq -r '.["id"] | split("/")[2]')
+        principalId=$(echo $SECRET | jq -r '.["principalId"]')
+        echo "::add-mask::$clientId"
+        echo "::add-mask::$tenantId"
+        echo "::add-mask::$subscriptionId"
+        echo "::add-mask::$principalId"
+        echo clientId=$clientId >> $GITHUB_OUTPUT
+        echo tenantId=$tenantId >> $GITHUB_OUTPUT
+        echo subscriptionId=$subscriptionId >> $GITHUB_OUTPUT
+        echo objectId=$principalId >> $GITHUB_OUTPUT
+
+    # Login
+    - name: 'Azure login'
+      uses: azure/login@v1
+      with:
+        client-id: ${{ steps.msiPrincipal.outputs.clientId }}
+        tenant-id: ${{ steps.msiPrincipal.outputs.tenantId }}
+        subscription-id: ${{ steps.msiPrincipal.outputs.subscriptionId }}
+        
+    # Checkout
+    - name: 'Checkout repository branch'
+      uses: actions/checkout@v2
+
+    # Download
+    - name: Download binary
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.LEPTOS_BIN_NAME }}
+        path: 'dist'
+
+    # Deployment
+    - name: Enable static websites on ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
+      id: azureResources
+      run: |
+        az --version
+        az storage blob service-properties update \ 
+          --subscription ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }} \
+          --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \ 
+          --static-website \ 
+          --404-document index.html \ 
+          --index-document index.html
+
+        az storage blob upload-batch \ 
+          --subscription ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }} \
+          --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \ 
+          --source 'dist' \ 
+          --destination '$web'
+
+    # Logout
+    - name: 'Azure logout'
+      run: |
+        az logout
+      if: always()
