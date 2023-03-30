@@ -75,6 +75,10 @@ jobs:
         website=$(az storage account show --name st7xju --query primaryEndpoints.web --output tsv)
         echo website=${website:0:-1} >> $GITHUB_OUTPUT
 
+    # Checkout
+    - name: 'Checkout repository branch'
+      uses: actions/checkout@v2   
+
     # Update env.rs 
     - name: Update env.ts
       run: |
@@ -82,10 +86,6 @@ jobs:
         echo 'pub const ISSUER_URL: &str = "${{ vars.AUTH_ISSUER_URL }}"' >> spa/src/env.rs;
         echo 'pub const REDIRECT_URL: &str = "${{ steps.storageAccount.outputs.website }}"' >> spa/src/env.rs;
         echo 'pub const API_SCOPE: &str = "${{ vars.AUTH_API_SCOPE }}"' >> spa/src/env.rs;
-
-    # Checkout
-    - name: 'Checkout repository branch'
-      uses: actions/checkout@v2   
 
     # Update / Install Rust
     - name: 'Update / install rust'
