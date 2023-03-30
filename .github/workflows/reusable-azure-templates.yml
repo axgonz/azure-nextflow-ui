@@ -41,6 +41,43 @@ jobs:
       run: |
         echo AZURE_STORAGEACCOUNT_NAME : ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
 
+    # Prase AZURE_MSI secret
+    - name: Prase AZURE_MSI secret
+      id: msiPrincipal
+      env:
+        SECRET: ${{ secrets.AZURE_MSI }}
+      run: |
+        clientId=$(echo $SECRET | jq -r '.["clientId"]')
+        tenantId=$(echo $SECRET | jq -r '.["tenantId"]')
+        subscriptionId=$(echo $SECRET | jq -r '.["id"] | split("/")[2]')
+        principalId=$(echo $SECRET | jq -r '.["principalId"]')
+        echo "::add-mask::$clientId"
+        echo "::add-mask::$tenantId"
+        echo "::add-mask::$subscriptionId"
+        echo "::add-mask::$principalId"
+        echo clientId=$clientId >> $GITHUB_OUTPUT
+        echo tenantId=$tenantId >> $GITHUB_OUTPUT
+        echo subscriptionId=$subscriptionId >> $GITHUB_OUTPUT
+        echo objectId=$principalId >> $GITHUB_OUTPUT
+
+    # Login
+    - name: 'Azure login'
+      uses: azure/login@v1
+      with:
+        client-id: ${{ steps.msiPrincipal.outputs.clientId }}
+        tenant-id: ${{ steps.msiPrincipal.outputs.tenantId }}
+        subscription-id: ${{ steps.msiPrincipal.outputs.subscriptionId }}
+
+    # Make sure storage account exists
+    - name: Locate storage account
+      id: storageAccount
+      run: |
+        website=$(az storage account show --name st7xju --query primaryEndpoints.web --output tsv)
+        echo website=${website:0:-1} >> $GITHUB_OUTPUT
+
+    # Update env.rs 
+      #ToDo
+
     # Checkout
     - name: 'Checkout repository branch'
       uses: actions/checkout@v2   
@@ -89,59 +126,6 @@ jobs:
         name: 'dist'
         path: 'dist/'
    
-  deploy:
-    runs-on: ubuntu-latest 
-    needs: 
-      - rust_build_leptos
-    steps:
-    # Inputs
-    - name: 'Show inputs'
-      run: |
-        echo AZURE_STORAGEACCOUNT_NAME : ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
-
-    # Prase AZURE_MSI secret
-    - name: Prase AZURE_MSI secret
-      id: msiPrincipal
-      env:
-        SECRET: ${{ secrets.AZURE_MSI }}
-      run: |
-        clientId=$(echo $SECRET | jq -r '.["clientId"]')
-        tenantId=$(echo $SECRET | jq -r '.["tenantId"]')
-        subscriptionId=$(echo $SECRET | jq -r '.["id"] | split("/")[2]')
-        principalId=$(echo $SECRET | jq -r '.["principalId"]')
-        echo "::add-mask::$clientId"
-        echo "::add-mask::$tenantId"
-        echo "::add-mask::$subscriptionId"
-        echo "::add-mask::$principalId"
-        echo clientId=$clientId >> $GITHUB_OUTPUT
-        echo tenantId=$tenantId >> $GITHUB_OUTPUT
-        echo subscriptionId=$subscriptionId >> $GITHUB_OUTPUT
-        echo objectId=$principalId >> $GITHUB_OUTPUT
-
-    # Login
-    - name: 'Azure login'
-      uses: azure/login@v1
-      with:
-        client-id: ${{ steps.msiPrincipal.outputs.clientId }}
-        tenant-id: ${{ steps.msiPrincipal.outputs.tenantId }}
-        subscription-id: ${{ steps.msiPrincipal.outputs.subscriptionId }}
-        
-    # Checkout
-    - name: 'Checkout repository branch'
-      uses: actions/checkout@v2
-
-    # Download
-    - name: Download dist directory
-      uses: actions/download-artifact@v3
-      with:
-        name: 'dist'
-        path: './'
-
-    # Show artifact
-    - name: List artifact 
-      run: |
-        ls -la dist
-
     # Deployment
     - name: Deploy static website to ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
       id: azureResources
