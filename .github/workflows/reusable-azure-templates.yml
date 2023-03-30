@@ -11,10 +11,6 @@ concurrency:
 on: 
   workflow_dispatch:
     inputs:
-      AZURE_SUBSCRIPTION_ID:
-        type: string
-        description: 'Azure subscription id'
-        required: false
       AZURE_STORAGEACCOUNT_NAME:
         type: string
         description: 'Azure storage account name'
@@ -43,7 +39,6 @@ jobs:
     # Inputs
     - name: 'Show inputs'
       run: |
-        echo AZURE_SUBSCRIPTION_ID : ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
         echo AZURE_STORAGEACCOUNT_NAME : ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
 
     # Checkout
@@ -102,7 +97,6 @@ jobs:
     # Inputs
     - name: 'Show inputs'
       run: |
-        echo AZURE_SUBSCRIPTION_ID : ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
         echo AZURE_STORAGEACCOUNT_NAME : ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
 
     # Prase AZURE_MSI secret
@@ -143,23 +137,27 @@ jobs:
         name: 'dist'
         path: './'
 
+    # Show artifact
+    - name: List artifact 
+      run: |
+        ls -la dist
+
     # Deployment
     - name: Deploy static website to ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
       id: azureResources
       run: |
         az --version
         az storage blob service-properties update \ 
-          --subscription ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }} \
           --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \ 
-          --static-website \ 
-          --404-document index.html \ 
-          --index-document index.html
+          --static-website true \ 
+          --404-document 'index.html' \ 
+          --index-document 'index.html'
 
         az storage blob upload-batch \ 
-          --subscription ${{ inputs.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }} \
           --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \ 
           --source 'dist' \ 
           --destination '$web'
+          --overwrite true
 
     # Logout
     - name: 'Azure logout'
