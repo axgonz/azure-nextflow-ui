@@ -80,7 +80,7 @@ jobs:
       uses: actions/checkout@v2   
 
     # Update env.rs 
-    - name: Update env.ts
+    - name: Update env.rs
       run: |
         echo 'pub const CLIENT_ID: &str = "${{ vars.AUTH_CLIENT_ID }}";' > spa/src/env.rs;
         echo 'pub const ISSUER_URL: &str = "${{ vars.AUTH_ISSUER_URL }}";' >> spa/src/env.rs;
