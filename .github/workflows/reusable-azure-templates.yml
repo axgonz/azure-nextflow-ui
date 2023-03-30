@@ -18,7 +18,17 @@ on:
       AZURE_STORAGEACCOUNT_NAME:
         type: string
         description: 'Azure storage account name'
-        required: false        
+        required: false
+  push:
+    branches:
+    - 'main'
+    paths:
+    - 'spa/src/**'
+    - 'spa/Cargo.toml'
+    - 'spa/styles/**'
+    - 'spa/public/**'
+    - 'spa/index.html'
+    - 'spa/tailwind.config.js'
 
 env:
   RUST_BACKTRACE: 'full'
@@ -64,8 +74,8 @@ jobs:
       run: |       
         pushd '${{ env.LEPTOS_SOURCE_PATH }}'
         npm install
-        cargo install trunk
         popd
+        cargo install trunk
 
     # Build
     - name: 'Build Leptos SPA using Trunk'
@@ -73,16 +83,16 @@ jobs:
       run: |       
         pushd '${{ env.LEPTOS_SOURCE_PATH }}'
         npx tailwindcss -i styles/input.css -o styles/tailwind.css --minify
+        popd
         export TRUNK_BUILD_RELEASE=true
         trunk build
-        popd
 
     # Archive
-    - name: Archive binary
+    - name: Archive dist directory
       uses: actions/upload-artifact@v3
       with:
         name: '${{ env.LEPTOS_BIN_NAME }}'
-        path: 'dist'
+        path: 'dist/'
    
   deploy:
     runs-on: ubuntu-latest 
@@ -127,14 +137,14 @@ jobs:
       uses: actions/checkout@v2
 
     # Download
-    - name: Download binary
+    - name: Download dist directory
       uses: actions/download-artifact@v3
       with:
         name: ${{ env.LEPTOS_BIN_NAME }}
-        path: 'dist'
+        path: './'
 
     # Deployment
-    - name: Enable static websites on ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
+    - name: Deploy static website to ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
       id: azureResources
       run: |
         az --version
