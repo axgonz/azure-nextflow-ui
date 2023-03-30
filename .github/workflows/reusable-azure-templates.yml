@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 on: 
-  workflow_call:
+  workflow_dispatch:
     inputs:
       AZURE_SUBSCRIPTION_ID:
         type: string
