@@ -137,16 +137,16 @@ jobs:
       id: azureResources
       run: |
         az --version
-        az storage blob service-properties update \ 
-          --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \ 
-          --static-website true \ 
-          --404-document 'index.html' \ 
+        az storage blob service-properties update \
+          --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \
+          --static-website true \
+          --404-document 'index.html' \
           --index-document 'index.html'
 
-        az storage blob upload-batch \ 
-          --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \ 
-          --source 'dist' \ 
-          --destination '$web'
+        az storage blob upload-batch \
+          --account-name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} \
+          --source 'dist' \
+          --destination '$web' \
           --overwrite true
 
     # Logout
