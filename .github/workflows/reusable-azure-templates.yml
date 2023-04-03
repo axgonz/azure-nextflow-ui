@@ -72,7 +72,7 @@ jobs:
     - name: Locate storage account
       id: storageAccount
       run: |
-        website=$(az storage account show --name "${{ AZURE_STORAGEACCOUNT_NAME }}" --query primaryEndpoints.web --output tsv)
+        website=$(az storage account show --name ${{ inputs.AZURE_STORAGEACCOUNT_NAME }} --query primaryEndpoints.web --output tsv)
         echo website=${website:0:-1} >> $GITHUB_OUTPUT
 
     # Checkout
