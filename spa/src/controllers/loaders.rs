@@ -9,15 +9,15 @@ use openidconnect::AccessToken;
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct GetMessagesRes {
-    pub result: Vec<Message>, 
-    pub error_status: Option<String>,   
+    pub result: Vec<Message>,
+    pub error_status: Option<String>,
     pub error_message: Option<String>
 }
 
 pub struct Loaders {}
 
 impl Loaders {
-    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool, access_token: Option<AccessToken>) -> GetMessagesRes { 
+    pub async fn web_load_queue_message(url: String, count: u8, dequeue: bool, access_token: Option<AccessToken>) -> GetMessagesRes {
         let req_uri: String = format!("{}/api/nxfutil/status", url);
         let req = StatusReq {
             summary: false,
@@ -25,7 +25,7 @@ impl Loaders {
             dequeue: dequeue
         };
         let res = WebHelpers::web_post(&req_uri, &serde_json::to_value(req).unwrap(), access_token).await;
-      
+
         match res {
             Ok(res) => {
                 match res.status() {
@@ -52,6 +52,7 @@ impl Loaders {
                         log!("Returning an empty {} because of {:#?} status code.", "Vec<Message>", res.status());
                         let error_message = match res.status().as_u16() {
                             401 => "Unauthorized. Try logging out and back in again.",
+                            403 => "Forbidden. If you have recently been granted access try logging out and back in again after a few minutes.",
                             _ => "Request failed. Try sending the request again in a few seconds."
                         };
                         return GetMessagesRes {
@@ -79,7 +80,7 @@ impl Loaders {
 
     pub async fn web_load_github_nextflow_workflow(project: NextflowProject, access_token: Option<AccessToken>) -> Vec<NextflowWorkflow> {
         let res = WebHelpers::web_get(&project.url, access_token).await;
-        
+
         let files: Vec<GitHubFile> = match res {
             Ok(res) => {
                 match res.status() {
@@ -170,7 +171,7 @@ impl Loaders {
                 vec![]
             }
         };
-        
+
         let mut nextflow_projects: Vec<NextflowProject> = vec![];
         for dir in dirs {
             if dir.r#type == "dir" {
@@ -186,16 +187,16 @@ impl Loaders {
             }
         }
         return nextflow_projects
-    }    
+    }
 
     pub async fn web_load_github_nextflow_workflows(repo: NextflowRepo, access_token: Option<AccessToken>) -> Vec<NextflowWorkflow> {
         let mut projects: Vec<NextflowProject> = vec![];
         projects.append(&mut Self::web_load_github_nextflow_projects(
-            repo.org, 
+            repo.org,
             repo.name,
             access_token.clone()
         ).await);
-    
+
         let mut workflows: Vec<NextflowWorkflow> = vec![];
         for project in projects {
             workflows.append(&mut Self::web_load_github_nextflow_workflow(
@@ -203,7 +204,7 @@ impl Loaders {
                 access_token.clone()
             ).await);
         }
-    
+
         return workflows
-    }  
+    }
 }

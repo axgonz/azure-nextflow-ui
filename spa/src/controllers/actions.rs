@@ -6,8 +6,8 @@ use leptos::log;
 
 #[derive(Clone)]
 pub struct DispatchWorkflowRes {
-    pub result: Vec<DispatchRes>, 
-    pub error_status: Option<String>,   
+    pub result: Vec<DispatchRes>,
+    pub error_status: Option<String>,
     pub error_message: Option<String>
 }
 
@@ -26,7 +26,7 @@ impl Actions {
                         match res.json().await {
                             Ok(json) => {
                                 return DispatchWorkflowRes {
-                                    result: vec![json],  
+                                    result: vec![json],
                                     error_status: None,
                                     error_message: None
                                 }
@@ -34,7 +34,7 @@ impl Actions {
                             Err(error) => {
                                 log!("Returning an empty {} because there is no JSON:\n{:#?}", "Vec<DispatchRes>", error);
                                 return DispatchWorkflowRes {
-                                    result: vec![],    
+                                    result: vec![],
                                     error_status: Some("BAD_JSON".to_string()),
                                     error_message: Some("Unable to parse server response to JSON.".to_string())
                                 }
@@ -45,10 +45,11 @@ impl Actions {
                         log!("Returning an empty {} because of {:#?} status code.", "Vec<DispatchRes>", res.status());
                         let error_message = match res.status().as_u16() {
                             401 => "Unauthorized. Try logging out and back in again.",
+                            403 => "Forbidden. If you have recently been granted access try logging out and back in again after a few minutes.",
                             _ => "Request failed. Try sending the request again in a few seconds."
                         };
                         return DispatchWorkflowRes {
-                            result: vec![],    
+                            result: vec![],
                             error_status: Some(res.status().as_u16().to_string()),
                             error_message: Some(error_message.to_string())
                         }
@@ -64,9 +65,9 @@ impl Actions {
                 }
             }
         };
-    } 
+    }
 
     pub async fn web_action_dispatcher_messages_dequeue(api_url: String, count: u8, access_token: Option<AccessToken>) -> GetMessagesRes {
         return Loaders::web_load_queue_message(api_url, count, true, access_token).await
-    }    
+    }
 }
