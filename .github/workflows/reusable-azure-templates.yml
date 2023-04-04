@@ -72,7 +72,7 @@ jobs:
     - name: Locate storage account
       id: storageAccount
       run: |
-        website=$(az storage account show --name ${{ inputs.AZURE_STORAGEACCOUNT_NAME }} --query primaryEndpoints.web --output tsv)
+        website=$(az storage account show --name ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }} --query primaryEndpoints.web --output tsv)
         echo website=${website:0:-1} >> $GITHUB_OUTPUT
 
     # Checkout
@@ -133,7 +133,7 @@ jobs:
         path: 'dist/'
 
     # Deployment
-    - name: Deploy static website to ${{ inputs.AZURE_STORAGEACCOUNT_NAME }}
+    - name: Deploy static website to ${{ inputs.AZURE_STORAGEACCOUNT_NAME || vars.AZURE_STORAGEACCOUNT_NAME }}
       id: azureResources
       run: |
         az --version
