@@ -126,7 +126,9 @@ jobs:
         pushd '${{ env.LEPTOS_SOURCE_PATH }}'
         npm install
         popd
-        cargo install trunk
+        if test ! -f ~/.cargo/bin/trunk; then
+          cargo install trunk
+        fi
 
     # Build
     - name: 'Build Leptos SPA using Trunk'
