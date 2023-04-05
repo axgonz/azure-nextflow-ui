@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <style>
+      .loader {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        background-color: black;
+        background: rgba(0, 0, 0, 0.3);
+      }
+      .loader div {
+        opacity: 1;
+        border: 7px solid #374151;
+        border-radius: 50%;
+        border-top: 7px solid #1D4ED8;
+        width: 32px;
+        height: 32px;
+        animation: spinner 1.5s linear infinite;
+      }
+      @keyframes spinner {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <!-- https://trunkrs.dev/assets/ -->
@@ -9,6 +36,7 @@
     <!-- Leptos: <Title /> -->
   </head>
   <body>
+    <div class="loader" id="splash"><div></div></div>
     <!-- Leptos: <Router /> -->
   </body>
 </html>

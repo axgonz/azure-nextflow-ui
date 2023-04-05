@@ -36,7 +36,10 @@ pub fn App(cx: Scope) -> impl IntoView {
     // Create a provide global state
     let data = create_rw_signal(cx, AppState::new());
     provide_context(cx, data);
-    
+
+    // App is loaded, time to remove the loading splash
+    document().get_element_by_id("splash").unwrap().remove();
+
     view! {
         cx,
         <Title text="Nxfutil"/>
